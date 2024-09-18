@@ -1,6 +1,8 @@
 package render
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -19,28 +21,44 @@ func addData(dataToAdd map[string]string) map[string]string {
 }
 
 // RenderPage render the requested page
-func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handlerData map[string]string) {
+func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handlerData map[string]string) error {
 
-	page, err := pagesCache()
-	if err != nil {
-		log.Println(err)
-		return
+	pages, _ := pagesCache()
+	/* if err != nil {
+		return err
+	} */
+
+	requestedPage, ok := pages[fmt.Sprintf("%s.page.html", pageName)]
+	if !ok {
+		return errors.New("page not found in cache")
 	}
 
 	data := addData(handlerData)
 
-	page[fmt.Sprintf("%s.page.html", pageName)].Execute(w, data)
+	buf := new(bytes.Buffer)
+
+	err := requestedPage.Execute(buf, data)
+	if err != nil {
+		return err
+	}
+
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // pagesCache create a map with all the pages parsed with the layouts and saved with their name as key
 func pagesCache() (map[string]*template.Template, error) {
 
-	parsePages := map[string]*template.Template{}
+	pagesCache := map[string]*template.Template{}
 
 	pages, err := filepath.Glob("./templates/*.page.html")
 	if err != nil {
 		log.Println("can't find pages files")
-		return nil, err
+		return pagesCache, err
 	}
 
 	for _, page := range pages {
@@ -48,15 +66,15 @@ func pagesCache() (map[string]*template.Template, error) {
 		parsePage, err := template.ParseFiles(page)
 		if err != nil {
 			log.Println("can't parse the page", err)
-			return nil, err
+			return pagesCache, err
 		}
 		parsePage, err = parsePage.ParseFiles("./templates/base.layout.html")
 		if err != nil {
 			log.Println("can't parse the layout", err)
-			return nil, err
+			return pagesCache, err
 		}
-		parsePages[name] = parsePage
+		pagesCache[name] = parsePage
 	}
 
-	return parsePages, nil
+	return pagesCache, nil
 }
