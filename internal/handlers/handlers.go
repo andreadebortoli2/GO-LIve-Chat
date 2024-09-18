@@ -9,7 +9,17 @@ import (
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
 
-	parsePage, err := render.RenderPage()
+	parsePage, err := render.RenderPage("home")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	parsePage.Execute(w, nil)
+}
+func AboutPage(w http.ResponseWriter, r *http.Request) {
+
+	parsePage, err := render.RenderPage("about")
 	if err != nil {
 		log.Println(err)
 		return
