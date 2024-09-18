@@ -1,0 +1,3 @@
+buiding a web app with differnt components to experiment and learn
+
+more info in the future....
