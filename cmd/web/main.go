@@ -9,8 +9,8 @@ import (
 
 func main() {
 
-	http.HandleFunc("/", handlers.HomePage)
-	http.HandleFunc("/about", handlers.AboutPage)
+	http.HandleFunc("/", handlers.ShowHomePage)
+	http.HandleFunc("/about", handlers.ShowAboutPage)
 
 	fmt.Println("serving on port 8080")
 	_ = http.ListenAndServe(":8080", nil)
