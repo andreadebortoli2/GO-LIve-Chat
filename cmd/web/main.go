@@ -2,32 +2,16 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"text/template"
+
+	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/handlers"
 )
 
 func main() {
 
-	http.HandleFunc("/", ShowPage)
+	http.HandleFunc("/", handlers.HomePage)
 
 	fmt.Println("serving on port 8080")
 	_ = http.ListenAndServe(":8080", nil)
 
-}
-
-func ShowPage(w http.ResponseWriter, r *http.Request) {
-
-	parsePage, err := template.ParseFiles("./templates/index.layout.html")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	parsePage, err = parsePage.ParseFiles("./templates/home.page.html")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	parsePage.Execute(w, nil)
 }
