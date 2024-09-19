@@ -17,12 +17,14 @@ func Router() *chi.Mux {
 	r.Use(middleware.Recoverer)
 	// add crsf token in cookies
 	r.Use(NoSurf)
-	// TODO! load session
+	// load session
+	r.Use(LoadSession)
 
-	r.Get("/", handlers.ShowHomePage)
-	r.Get("/about", handlers.ShowAboutPage)
-	r.Get("/contact", handlers.ShowContactPage)
-	r.Post("/contact", handlers.PostContact)
+	// public routes
+	r.Get("/", handlers.Repo.ShowHomePage)
+	r.Get("/about", handlers.Repo.ShowAboutPage)
+	r.Get("/contact", handlers.Repo.ShowContactPage)
+	r.Post("/contact", handlers.Repo.PostContact)
 
 	return r
 }
@@ -39,4 +41,9 @@ func NoSurf(next http.Handler) http.Handler {
 		SameSite: http.SameSiteLaxMode,
 	})
 	return csrfHandler
+}
+
+// LoadSession load the session
+func LoadSession(next http.Handler) http.Handler {
+	return session.LoadAndSave(next)
 }

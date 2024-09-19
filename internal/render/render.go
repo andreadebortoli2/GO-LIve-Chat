@@ -9,16 +9,19 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
 	"github.com/justinas/nosurf"
 )
+
+var appConfig config.AppConfig
 
 func addData(dataToAdd map[string]string, r *http.Request) map[string]string {
 	data := map[string]string{}
 	data["test"] = "passing data to page from render"
+	data["test2"] = dataToAdd["test2"]
+	data["success"] = dataToAdd["success"]
+	data["remoteIP"] = dataToAdd["remoteIP"]
 	data["CSRFToken"] = nosurf.Token(r)
-	for key, content := range dataToAdd {
-		data[key] = content
-	}
 
 	return data
 }
