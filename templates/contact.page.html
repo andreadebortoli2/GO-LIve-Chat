@@ -1,0 +1,15 @@
+{{template "base" .}}
+{{define "content"}}
+<h3>Contact page</h3>
+{{index . "test"}}
+<br>
+{{if not .success}}
+<form action="/contact" method="post">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="text" name="test" id="test" value="Test">
+    <input type="submit" value="Send">
+</form>
+{{else}}
+<strong>{{.success}}</strong>
+{{end}}
+{{end}}

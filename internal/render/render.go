@@ -8,11 +8,14 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/justinas/nosurf"
 )
 
-func addData(dataToAdd map[string]string) map[string]string {
+func addData(dataToAdd map[string]string, r *http.Request) map[string]string {
 	data := map[string]string{}
 	data["test"] = "passing data to page from render"
+	data["CSRFToken"] = nosurf.Token(r)
 	for key, content := range dataToAdd {
 		data[key] = content
 	}
@@ -24,16 +27,13 @@ func addData(dataToAdd map[string]string) map[string]string {
 func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handlerData map[string]string) error {
 
 	pages, _ := pagesCache()
-	/* if err != nil {
-		return err
-	} */
 
 	requestedPage, ok := pages[fmt.Sprintf("%s.page.html", pageName)]
 	if !ok {
 		return errors.New("page not found in cache")
 	}
 
-	data := addData(handlerData)
+	data := addData(handlerData, r)
 
 	buf := new(bytes.Buffer)
 
