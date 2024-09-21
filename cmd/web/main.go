@@ -10,6 +10,7 @@ import (
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/database"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/handlers"
+	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/render"
 )
 
 var appConfig config.AppConfig
@@ -23,7 +24,7 @@ func main() {
 	}
 	log.Println("Connected to database")
 	defer func() {
-		sqlDB, _ := db.DB()
+		sqlDB, _ := db.SQLite3.DB()
 		sqlDB.Close()
 	}()
 
@@ -38,6 +39,7 @@ func main() {
 
 	repo := handlers.NewRepo(&appConfig)
 	handlers.NewHandlers(repo)
+	render.NewRenderer(&appConfig)
 
 	router := Router()
 

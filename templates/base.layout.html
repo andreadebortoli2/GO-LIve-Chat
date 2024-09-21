@@ -10,14 +10,22 @@
 </head>
 
 <body>
+
     <nav>
         <a href="/">Home</a>
         <a href="/about">About</a>
-        <a href="/contact">Contact</a>
+        {{if eq .auth "" }}
+        <a href="/login">Login</a>
+        {{else}}
+        <a href="/logout">Logout</a>
+        {{end}}
     </nav>
+
     <h3 class="blue">layout</h3>
+
     {{block "content" .}}
     {{end}}
+
 </body>
 
 </html>

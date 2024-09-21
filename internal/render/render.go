@@ -13,15 +13,16 @@ import (
 	"github.com/justinas/nosurf"
 )
 
-var appConfig config.AppConfig
+var appConfig *config.AppConfig
+
+func NewRenderer(a *config.AppConfig) {
+	appConfig = a
+}
 
 func addData(dataToAdd map[string]string, r *http.Request) map[string]string {
 	data := map[string]string{}
-	data["test"] = "passing data to page from render"
-	data["test2"] = dataToAdd["test2"]
-	data["success"] = dataToAdd["success"]
-	data["remoteIP"] = dataToAdd["remoteIP"]
 	data["CSRFToken"] = nosurf.Token(r)
+	data["auth"] = appConfig.Session.GetString(r.Context(), "auth")
 
 	return data
 }
