@@ -2,14 +2,20 @@
 {{define "content"}}
 <h2>Login</h2>
 
+{{if ne .error ""}}
+<p style="color: orange;">{{.error}}</p>
+{{end}}
+
 <form action="/login" method="post">
+
     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
     <label for="email">Email</label>
-    <!-- <input type="email" name="email" id="email" required> -->
-    <input type="email" name="email" id="email">
+    <input type="email" name="email" id="email" value="{{.email}}" required>
+
     <label for="password">Password</label>
-    <!-- <input type="text" name="password" id="password" required> -->
-    <input type="text" name="password" id="password">
+    <input type="text" name="password" id="password" value="{{.password}}" required>
+
     <input type="submit" value="Login">
 </form>
 

@@ -2,7 +2,9 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
 	"golang.org/x/crypto/bcrypt"
@@ -17,7 +19,7 @@ func Login(email, password string) (models.User, error) {
 	err := tx.Error
 	if err != nil {
 		log.Println(err)
-		return result, err
+		return result, errors.New("cannot find the user into the database")
 	}
 
 	if result.Password == "" {
@@ -26,7 +28,7 @@ func Login(email, password string) (models.User, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password))
 	if err != nil {
 		log.Println(err)
-		return result, err
+		return result, errors.New("the password is not correct")
 	}
 	return result, nil
 }
@@ -37,7 +39,7 @@ func AddUser(userName, email, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	if err != nil {
 		log.Println(err)
-		return err
+		return errors.New("failed encrypting the password")
 	}
 
 	newUser := models.User{
@@ -49,7 +51,9 @@ func AddUser(userName, email, password string) error {
 	result := dbConn.SQLite3.Create(&newUser)
 	err = result.Error
 	if err != nil {
-		return err
+		es1 := strings.Split(err.Error(), ".")
+		es2 := strings.Split(es1[1], " ")
+		return fmt.Errorf("a user with this %s already exist", es2[0])
 	}
 
 	return nil

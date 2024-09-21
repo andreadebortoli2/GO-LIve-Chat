@@ -24,6 +24,9 @@ func addData(dataToAdd map[string]string, r *http.Request) map[string]string {
 	data := map[string]string{}
 	data["CSRFToken"] = nosurf.Token(r)
 	data["auth"] = appConfig.Session.GetString(r.Context(), "auth")
+	for k, v := range dataToAdd {
+		data[k] = v
+	}
 
 	return data
 }

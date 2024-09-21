@@ -6,6 +6,7 @@ import (
 
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/database"
+	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/helpers"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/render"
 )
@@ -45,7 +46,6 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Println(err)
-		// TODO: add message to tell the error to user?
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -53,11 +53,24 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
+	fields := map[string]string{
+		"email":    email,
+		"password": password,
+	}
+
+	err = helpers.LoginValidation(fields)
+	if err != nil {
+		log.Println(err)
+		fields["error"] = err.Error()
+		render.RenderPage(w, r, "login", fields)
+		return
+	}
+
 	user, err := database.Login(email, password)
 	if err != nil {
 		log.Println(err)
-		// TODO: add message to tell the error to user?
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		fields["error"] = err.Error()
+		render.RenderPage(w, r, "login", fields)
 		return
 	}
 
@@ -87,7 +100,6 @@ func (m *Repository) PostNewUserPage(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Println(err)
-		// TODO: add message to tell the error to user?
 		http.Redirect(w, r, "/new-user", http.StatusSeeOther)
 		return
 	}
@@ -96,11 +108,25 @@ func (m *Repository) PostNewUserPage(w http.ResponseWriter, r *http.Request) {
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
+	fields := map[string]string{
+		"user_name": userName,
+		"email":     email,
+		"password":  password,
+	}
+
+	err = helpers.NewUserValidation(fields)
+	if err != nil {
+		log.Println(err)
+		fields["error"] = err.Error()
+		render.RenderPage(w, r, "new-user", fields)
+		return
+	}
+
 	err = database.AddUser(userName, email, password)
 	if err != nil {
 		log.Println(err)
-		// TODO: add message to tell the error to user?
-		http.Redirect(w, r, "/new-user", http.StatusSeeOther)
+		fields["error"] = err.Error()
+		render.RenderPage(w, r, "new-user", fields)
 		return
 	}
 
@@ -108,8 +134,8 @@ func (m *Repository) PostNewUserPage(w http.ResponseWriter, r *http.Request) {
 	user, err := database.Login(email, password)
 	if err != nil {
 		log.Println(err)
-		// TODO: add message to tell the error to user?
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		fields["error"] = err.Error()
+		render.RenderPage(w, r, "new-user", fields)
 		return
 	}
 	if user != (models.User{}) {
