@@ -23,8 +23,9 @@ func Router() *chi.Mux {
 	// public routes
 	r.Get("/", handlers.Repo.ShowHomePage)
 	r.Get("/about", handlers.Repo.ShowAboutPage)
-	r.Get("/contact", handlers.Repo.ShowContactPage)
-	r.Post("/contact", handlers.Repo.PostContact)
+	r.Get("/login", handlers.Repo.ShowLoginPage)
+	r.Post("/login", handlers.Repo.PostLogin)
+	r.Get("/logout", handlers.Repo.ShowLogoutPage)
 
 	return r
 }

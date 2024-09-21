@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
+	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/database"
+	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/render"
 )
 
@@ -23,42 +25,53 @@ func NewHandlers(r *Repository) {
 	Repo = r
 }
 
+// ShowHomePage show home page
 func (m *Repository) ShowHomePage(w http.ResponseWriter, r *http.Request) {
-
-	remoteIP := r.RemoteAddr
-	m.App.Session.Put(r.Context(), "remoteIP", remoteIP)
-
 	render.RenderPage(w, r, "home", nil)
 }
+
+// ShowAboutPage show about page
 func (m *Repository) ShowAboutPage(w http.ResponseWriter, r *http.Request) {
-
-	data := make(map[string]string)
-	data["test2"] = "passing data through handler"
-
-	remoteIP := m.App.Session.GetString(r.Context(), "remoteIP")
-	data["remoteIP"] = remoteIP
-
-	render.RenderPage(w, r, "about", data)
+	render.RenderPage(w, r, "about", nil)
 }
-func (m *Repository) ShowContactPage(w http.ResponseWriter, r *http.Request) {
 
-	render.RenderPage(w, r, "contact", nil)
+// ShowLoginPage show login page
+func (m *Repository) ShowLoginPage(w http.ResponseWriter, r *http.Request) {
+	render.RenderPage(w, r, "login", nil)
 }
-func (m *Repository) PostContact(w http.ResponseWriter, r *http.Request) {
+
+// PostLogin logic to login the usesr
+func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Println(err)
-		log.Println("not working")
-		return
+		// TODO: add message to tell the error to user?
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
-	log.Println("working")
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
 
-	data := map[string]string{
-		"success": "form posted successfully",
+	user, err := database.Login(email, password, r)
+	if err != nil {
+		log.Println(err)
+		// TODO: add message to tell the error to user?
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
+	if user == (models.User{}) {
+		m.App.Session.Put(r.Context(), "auth", nil)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+	_ = m.App.Session.RenewToken(r.Context())
+	m.App.Session.Put(r.Context(), "auth", user.AccessLevel)
 
-	remoteIP := m.App.Session.GetString(r.Context(), "remoteIP")
-	data["remoteIP"] = remoteIP
+	log.Println("auth:", user.AccessLevel)
 
-	render.RenderPage(w, r, "contact", data)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// ShowLogoutPage logic to logout the user
+func (m *Repository) ShowLogoutPage(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.Destroy(r.Context())
+	_ = m.App.Session.RenewToken(r.Context())
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
