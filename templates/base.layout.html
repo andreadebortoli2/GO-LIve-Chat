@@ -16,12 +16,11 @@
         <a href="/about">About</a>
         {{if eq .auth "" }}
         <a href="/login">Login</a>
+        <a href="/new-user">Register</a>
         {{else}}
         <a href="/logout">Logout</a>
         {{end}}
     </nav>
-
-    <h3 class="blue">layout</h3>
 
     {{block "content" .}}
     {{end}}

@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	UserName    string `gorm: "unique"`
-	Email       string `gorm: "unique"`
-	Password    string `gorm: "unique"`
+	UserName    string `gorm:"unique"`
+	Email       string `gorm:"unique"`
+	Password    string `gorm:"type:varchar(60);unique"`
 	AccessLevel string
 }
 

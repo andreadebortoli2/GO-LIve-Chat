@@ -2,7 +2,6 @@ package database
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
@@ -38,11 +37,26 @@ func execMigrations(db *gorm.DB) {
 }
 
 func userSeeder(db *gorm.DB) {
-	// TODO! hash passwords
+
+	// all passwords are: password
 	users := []*models.User{
-		{UserName: "admin", Email: "admin@admin.com", Password: "password", AccessLevel: "3"},
-		{UserName: "moderator", Email: "moderator@moderator.com", Password: "password", AccessLevel: "2"},
-		{UserName: "user", Email: "user@user.com", Password: "password"},
+		{
+			UserName:    "admin",
+			Email:       "admin@admin.com",
+			Password:    "$2a$12$39JTEON1eLjhQ4uHq/L8SuQNn9kUgqCuCA3LmSZ3A9iJK6Ay82VvC",
+			AccessLevel: "3",
+		},
+		{
+			UserName:    "moderator",
+			Email:       "moderator@moderator.com",
+			Password:    "$2a$12$yMUW6GklJCw3ehtbs9kDQ.AtlTYPCLnimGNgWN6BH9bjvAOlXge1G",
+			AccessLevel: "2",
+		},
+		{
+			UserName: "user",
+			Email:    "user@user.com",
+			Password: "$2a$12$JCdNB2z/3YwQhUjd1TVlDeaf4ULeNmNoKcj1V6qWUUFKjkC7b.q2q",
+		},
 	}
 
 	result := db.Create(users)
@@ -50,15 +64,4 @@ func userSeeder(db *gorm.DB) {
 		log.Println(err)
 	}
 	log.Printf("added %d initial users", result.RowsAffected)
-}
-
-// Login return the user if exist
-func Login(email, password string, r *http.Request) (models.User, error) {
-	var result models.User
-	err := dbConn.SQLite3.Table("users").Select("*").Where("email = ? AND password = ?", email, password).Scan(&result).Error
-	if err != nil {
-		log.Println(err)
-		return result, err
-	}
-	return result, nil
 }

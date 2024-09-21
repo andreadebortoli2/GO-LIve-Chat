@@ -1,18 +1,18 @@
 {{template "base" .}}
 {{define "content"}}
-<h2>Login</h2>
+<h2>Register</h2>
 
-<form action="/login" method="post">
+<form action="/new-user" method="post">
     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <label for="user_name">User_name</label>
+    <!-- <input type="text" name="user_name" id="user_name" required> -->
+    <input type="text" name="user_name" id="user_name">
     <label for="email">Email</label>
     <!-- <input type="email" name="email" id="email" required> -->
     <input type="email" name="email" id="email">
     <label for="password">Password</label>
     <!-- <input type="text" name="password" id="password" required> -->
     <input type="text" name="password" id="password">
-    <input type="submit" value="Login">
+    <input type="submit" value="Register">
 </form>
-
-<a href="/new-user">Register</a>
-
 {{end}}

@@ -26,6 +26,8 @@ func Router() *chi.Mux {
 	r.Get("/login", handlers.Repo.ShowLoginPage)
 	r.Post("/login", handlers.Repo.PostLogin)
 	r.Get("/logout", handlers.Repo.ShowLogoutPage)
+	r.Get("/new-user", handlers.Repo.ShowNewUserPage)
+	r.Post("/new-user", handlers.Repo.PostNewUserPage)
 
 	return r
 }

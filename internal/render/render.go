@@ -19,6 +19,7 @@ func NewRenderer(a *config.AppConfig) {
 	appConfig = a
 }
 
+// addData add data to template
 func addData(dataToAdd map[string]string, r *http.Request) map[string]string {
 	data := map[string]string{}
 	data["CSRFToken"] = nosurf.Token(r)

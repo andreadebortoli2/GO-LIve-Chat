@@ -40,33 +40,34 @@ func (m *Repository) ShowLoginPage(w http.ResponseWriter, r *http.Request) {
 	render.RenderPage(w, r, "login", nil)
 }
 
-// PostLogin logic to login the usesr
+// PostLogin logic to login the user
 func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Println(err)
 		// TODO: add message to tell the error to user?
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
+
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
-	user, err := database.Login(email, password, r)
+	user, err := database.Login(email, password)
 	if err != nil {
 		log.Println(err)
 		// TODO: add message to tell the error to user?
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
-	if user == (models.User{}) {
-		m.App.Session.Put(r.Context(), "auth", nil)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+
+	// if a user is returned give the authorization saving auth level in the session
+	if user != (models.User{}) {
+		_ = m.App.Session.RenewToken(r.Context())
+		m.App.Session.Put(r.Context(), "auth", user.AccessLevel)
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
-	_ = m.App.Session.RenewToken(r.Context())
-	m.App.Session.Put(r.Context(), "auth", user.AccessLevel)
-
-	log.Println("auth:", user.AccessLevel)
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // ShowLogoutPage logic to logout the user
@@ -74,4 +75,47 @@ func (m *Repository) ShowLogoutPage(w http.ResponseWriter, r *http.Request) {
 	_ = m.App.Session.Destroy(r.Context())
 	_ = m.App.Session.RenewToken(r.Context())
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// ShowNewUserPage show new-user page
+func (m *Repository) ShowNewUserPage(w http.ResponseWriter, r *http.Request) {
+	render.RenderPage(w, r, "new-user", nil)
+}
+
+// PostNewUserPage add new user to DB
+func (m *Repository) PostNewUserPage(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		// TODO: add message to tell the error to user?
+		http.Redirect(w, r, "/new-user", http.StatusSeeOther)
+		return
+	}
+
+	userName := r.Form.Get("user_name")
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	err = database.AddUser(userName, email, password)
+	if err != nil {
+		log.Println(err)
+		// TODO: add message to tell the error to user?
+		http.Redirect(w, r, "/new-user", http.StatusSeeOther)
+		return
+	}
+
+	// after correct registration immediatly login the user and redirect
+	user, err := database.Login(email, password)
+	if err != nil {
+		log.Println(err)
+		// TODO: add message to tell the error to user?
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	if user != (models.User{}) {
+		_ = m.App.Session.RenewToken(r.Context())
+		m.App.Session.Put(r.Context(), "auth", user.AccessLevel)
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
 }
