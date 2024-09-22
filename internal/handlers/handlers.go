@@ -77,7 +77,9 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	// if a user is returned give the authorization saving auth level in the session
 	if user != (models.User{}) {
 		_ = m.App.Session.RenewToken(r.Context())
-		m.App.Session.Put(r.Context(), "auth", user.AccessLevel)
+
+		m.App.Session.Put(r.Context(), "userName", user.UserName)
+		m.App.Session.Put(r.Context(), "accessLevel", user.AccessLevel)
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
@@ -96,7 +98,7 @@ func (m *Repository) ShowNewUserPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // PostNewUserPage add new user to DB
-func (m *Repository) PostNewUserPage(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Println(err)
@@ -144,4 +146,15 @@ func (m *Repository) PostNewUserPage(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+
+// ShowDashboardPage show dashboard page
+func (m *Repository) ShowDashboardPage(w http.ResponseWriter, r *http.Request) {
+	render.RenderPage(w, r, "dashboard", nil)
+}
+
+// ShowAdminAllUsersPage show the administraation page with all the users
+func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Request) {
+	// TODO: display the users
+	render.RenderPage(w, r, "admin-all-users", nil)
 }

@@ -27,7 +27,21 @@ func Router() *chi.Mux {
 	r.Post("/login", handlers.Repo.PostLogin)
 	r.Get("/logout", handlers.Repo.ShowLogoutPage)
 	r.Get("/new-user", handlers.Repo.ShowNewUserPage)
-	r.Post("/new-user", handlers.Repo.PostNewUserPage)
+	r.Post("/new-user", handlers.Repo.PostNewUser)
+
+	// secure routes
+	r.Group(func(r chi.Router) {
+		// auth middleware
+		r.Use(authMiddleware)
+
+		r.Get("/dashboard", handlers.Repo.ShowDashboardPage)
+
+		// restricted admin routes
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(adminAuthMiddleware)
+			r.Get("/all-users", handlers.Repo.ShowAdminAllUsersPage)
+		})
+	})
 
 	return r
 }
@@ -49,4 +63,28 @@ func NoSurf(next http.Handler) http.Handler {
 // LoadSession load the session
 func LoadSession(next http.Handler) http.Handler {
 	return session.LoadAndSave(next)
+}
+
+// authMiddleware authenticate registered users
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		auth := session.Exists(r.Context(), "accessLevel")
+		if !auth {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// adminAuthMiddleware authenticate registered users
+func adminAuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		auth := session.GetString(r.Context(), "accessLevel")
+		if auth != "3" {
+			http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

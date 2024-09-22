@@ -14,13 +14,31 @@
     <nav>
         <a href="/">Home</a>
         <a href="/about">About</a>
-        {{if eq .auth "" }}
+        {{if eq .accessLevel "" }}
         <a href="/login">Login</a>
         <a href="/new-user">Register</a>
         {{else}}
         <a href="/logout">Logout</a>
+        <ul style="display: inline-block;">
+            <li>
+                <strong>
+                    Sections
+                </strong>
+            </li>
+            <li>
+                <a href="/dashboard">Dashboard</a>
+            </li>
+            {{if eq .accessLevel "3"}}
+            <li>
+                <a href="/admin/all-users">Admin users</a>
+            </li>
+            {{end}}
+        </ul>
         {{end}}
+
     </nav>
+
+    <div>access level: {{.accessLevel}}</div>
 
     {{block "content" .}}
     {{end}}

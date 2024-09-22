@@ -23,7 +23,8 @@ func NewRenderer(a *config.AppConfig) {
 func addData(dataToAdd map[string]string, r *http.Request) map[string]string {
 	data := map[string]string{}
 	data["CSRFToken"] = nosurf.Token(r)
-	data["auth"] = appConfig.Session.GetString(r.Context(), "auth")
+	data["userName"] = appConfig.Session.GetString(r.Context(), "userName")
+	data["accessLevel"] = appConfig.Session.GetString(r.Context(), "accessLevel")
 	for k, v := range dataToAdd {
 		data[k] = v
 	}
