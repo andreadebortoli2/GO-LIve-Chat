@@ -9,7 +9,15 @@
         Email: <strong>{{.ActiveUser.Email}}</strong>
     </li>
     <li>
-        Access Level: <strong>{{.ActiveUser.AccessLevel}}</strong>
+        Access Level: <strong>
+            {{if eq .ActiveUser.AccessLevel 1}}
+            User
+            {{else if eq .ActiveUser.AccessLevel 2}}
+            Moderator
+            {{else if eq .ActiveUser.AccessLevel 3}}
+            Administrator
+            {{end}}
+        </strong>
     </li>
 </ul>
 {{end}}

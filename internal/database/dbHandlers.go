@@ -59,14 +59,49 @@ func AddUser(userName, email, password string) error {
 }
 
 func GetAllUsers() ([]models.User, error) {
+	var users []models.User
 	result := []models.User{}
-	tx := dbConn.SQLite3.Raw("SELECT * FROM users ORDER BY id").Scan(&result)
+	// tx := dbConn.SQLite3.Raw("SELECT * FROM users ORDER BY id").Scan(&result)
+	// GORM syntax to not get soft deleted users
+	tx := dbConn.SQLite3.Find(&users).Order("id").Scan(&result)
 	if err := tx.Error; err != nil {
 		log.Println(err)
 		return result, errors.New("cannot find the users into the database")
 	}
-	/* for _, v := range result {
-		result = append(result, v)
-	} */
 	return result, nil
+}
+
+func SetModerator(accLvl string, id string) error {
+	var user models.User
+	tx := dbConn.SQLite3.First(&user, id)
+	if err := tx.Error; err != nil {
+		log.Println(err)
+		return err
+	}
+
+	var accLvlReverse string
+
+	if accLvl == "1" {
+		accLvlReverse = "2"
+	} else {
+		accLvlReverse = "1"
+	}
+
+	user.AccessLevel = accLvlReverse
+	tx = dbConn.SQLite3.Save(&user)
+	if err := tx.Error; err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func DeleteUserByID(id string) error {
+	tx := dbConn.SQLite3.Delete(&models.User{}, id)
+	if err := tx.Error; err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }

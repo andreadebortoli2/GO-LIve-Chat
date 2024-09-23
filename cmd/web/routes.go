@@ -41,8 +41,11 @@ func Router() *chi.Mux {
 
 		// restricted admin routes
 		r.Route("/admin", func(r chi.Router) {
+			// users CRUD
 			r.Use(adminAuthMiddleware)
 			r.Get("/all-users", handlers.Repo.ShowAdminAllUsersPage)
+			r.Post("/change-access-level", handlers.Repo.PostChangeAccessLevel)
+			r.Post("/delete-user", handlers.Repo.PostDeleteUser)
 		})
 	})
 

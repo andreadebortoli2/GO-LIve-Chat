@@ -126,7 +126,7 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		strErr := err.Error()
-		render.RenderPage(w, r, "login", &render.TemplateData{
+		render.RenderPage(w, r, "new-user", &render.TemplateData{
 			StringMap: fields,
 			Error:     strErr,
 		})
@@ -137,7 +137,7 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		strErr := err.Error()
-		render.RenderPage(w, r, "login", &render.TemplateData{
+		render.RenderPage(w, r, "new-user", &render.TemplateData{
 			StringMap: fields,
 			Error:     strErr,
 		})
@@ -176,7 +176,6 @@ func (m *Repository) ShowProfilePage(w http.ResponseWriter, r *http.Request) {
 
 // ShowAdminAllUsersPage show the administraation page with all the users
 func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Request) {
-	// TODO: display the users
 	users, err := database.GetAllUsers()
 	if err != nil {
 		log.Println(err)
@@ -191,4 +190,38 @@ func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Reques
 	render.RenderPage(w, r, "admin-all-users", &render.TemplateData{
 		Data: data,
 	})
+}
+
+func (m *Repository) PostChangeAccessLevel(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
+		return
+	}
+	accLvl := r.Form.Get("moderator")
+	userID := r.Form.Get("user-id")
+
+	err = database.SetModerator(accLvl, userID)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
+}
+
+func (m *Repository) PostDeleteUser(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
+		return
+	}
+
+	userID := r.Form.Get("user-id")
+
+	database.DeleteUserByID(userID)
+
+	http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
 }

@@ -8,10 +8,12 @@
             <th>ID</th>
             <th>UserName</th>
             <th>Email</th>
-            <th>Access Level</th>
+            <th>Moderator</th>
+            <th>Delete</th>
         </tr>
     </thead>
     <tbody>
+        {{$t :=.CSRFToken}}
         {{range index .Data "users"}}
         <tr>
             <td>{{.ID}}</td>
@@ -19,7 +21,22 @@
             <td>{{.Email}}</td>
             <td>
                 {{if ne .AccessLevel "3"}}
-                {{.AccessLevel}}
+                <form method="post" action="/admin/change-access-level" id="mod-form{{.ID}}">
+                    <input type="hidden" name="csrf_token" value="{{$t}}">
+                    <input type="hidden" name="user-id" value="{{.ID}}">
+                    <input type="checkbox" name="moderator" id="{{.ID}}" value="{{.AccessLevel}}" {{if eq
+                        .AccessLevel "2" }} checked {{end}}
+                        onchange="document.getElementById('mod-form{{.ID}}').submit()">
+                </form>
+                {{end}}
+            </td>
+            <td>
+                {{if ne .AccessLevel "3"}}
+                <form method="post" action="/admin/delete-user" id="del-form{{.ID}}">
+                    <input type="hidden" name="csrf_token" value="{{$t}}">
+                    <input type="hidden" name="user-id" value="{{.ID}}">
+                    <button type="submit">Del</button>
+                </form>
                 {{end}}
             </td>
         </tr>
