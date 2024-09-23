@@ -1,7 +1,6 @@
 {{template "base" .}}
-
 {{define "content"}}
 <h2>Dashboard</h2>
 
-<p>Welcome <strong>{{.userName}}</strong></p>
+<p>Welcome <a href="/profile"><strong>{{.ActiveUser.UserName}}</strong></a></p>
 {{end}}

@@ -1,0 +1,15 @@
+{{template "base" .}}
+{{define "content"}}
+<h2>Profile</h2>
+<ul>
+    <li>
+        Username: <strong>{{.ActiveUser.UserName}}</strong>
+    </li>
+    <li>
+        Email: <strong>{{.ActiveUser.Email}}</strong>
+    </li>
+    <li>
+        Access Level: <strong>{{.ActiveUser.AccessLevel}}</strong>
+    </li>
+</ul>
+{{end}}

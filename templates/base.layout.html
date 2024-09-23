@@ -14,7 +14,7 @@
     <nav>
         <a href="/">Home</a>
         <a href="/about">About</a>
-        {{if eq .accessLevel "" }}
+        {{if eq .ActiveUser.AccessLevel 0 }}
         <a href="/login">Login</a>
         <a href="/new-user">Register</a>
         {{else}}
@@ -28,7 +28,10 @@
             <li>
                 <a href="/dashboard">Dashboard</a>
             </li>
-            {{if eq .accessLevel "3"}}
+            <li>
+                <a href="/profile">Profile</a>
+            </li>
+            {{if eq .ActiveUser.AccessLevel 3}}
             <li>
                 <a href="/admin/all-users">Admin users</a>
             </li>
@@ -38,7 +41,7 @@
 
     </nav>
 
-    <div>access level: {{.accessLevel}}</div>
+    <div>access level: {{.ActiveUser.AccessLevel}}</div>
 
     {{block "content" .}}
     {{end}}

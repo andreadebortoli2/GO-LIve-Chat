@@ -16,8 +16,7 @@ var bcryptCost = 12
 func Login(email, password string) (models.User, error) {
 	var result models.User
 	tx := dbConn.SQLite3.Table("users").Select("*").Where("email = ?", email).Scan(&result)
-	err := tx.Error
-	if err != nil {
+	if err := tx.Error; err != nil {
 		log.Println(err)
 		return result, errors.New("cannot find the user into the database")
 	}
@@ -25,7 +24,7 @@ func Login(email, password string) (models.User, error) {
 	if result.Password == "" {
 		return result, errors.New("user not registrered")
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password))
 	if err != nil {
 		log.Println(err)
 		return result, errors.New("the password is not correct")
@@ -57,4 +56,17 @@ func AddUser(userName, email, password string) error {
 	}
 
 	return nil
+}
+
+func GetAllUsers() ([]models.User, error) {
+	result := []models.User{}
+	tx := dbConn.SQLite3.Raw("SELECT * FROM users ORDER BY id").Scan(&result)
+	if err := tx.Error; err != nil {
+		log.Println(err)
+		return result, errors.New("cannot find the users into the database")
+	}
+	/* for _, v := range result {
+		result = append(result, v)
+	} */
+	return result, nil
 }

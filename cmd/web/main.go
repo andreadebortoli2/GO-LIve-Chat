@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/database"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/handlers"
+	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/render"
 )
 
@@ -29,6 +31,7 @@ func main() {
 	}()
 
 	// set the session parameters
+	gob.Register(models.User{})
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true

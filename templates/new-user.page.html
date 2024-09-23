@@ -2,22 +2,25 @@
 {{define "content"}}
 <h2>Register</h2>
 
-{{if ne .error ""}}
-<p style="color: orange;">{{.error}}</p>
+{{if ne .Error ""}}
+<p style="color: orange;">{{.Error}}</p>
 {{end}}
+
+{{$un := index .StringMap "user_name" }}
+{{$e := index .StringMap "email" }}
 
 <form action="/new-user" method="post">
 
     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
     <label for="user_name">User name</label>
-    <input type="text" name="user_name" id="user_name" value="{{.user_name}}" required>
+    <input type="text" name="user_name" id="user_name" value="{{$un}}" required>
 
     <label for="email">Email</label>
-    <input type="email" name="email" id="email" value="{{.email}}" required>
+    <input type="email" name="email" id="email" value="{{$e}}" required>
 
     <label for="password">Password</label>
-    <input type="text" name="password" id="password" value="{{.password}}" required>
+    <input type="text" name="password" id="password" required>
 
     <input type="submit" value="Register">
 </form>

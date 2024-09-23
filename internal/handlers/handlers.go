@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/database"
@@ -28,17 +29,17 @@ func NewHandlers(r *Repository) {
 
 // ShowHomePage show home page
 func (m *Repository) ShowHomePage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "home", nil)
+	render.RenderPage(w, r, "home", &render.TemplateData{})
 }
 
 // ShowAboutPage show about page
 func (m *Repository) ShowAboutPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "about", nil)
+	render.RenderPage(w, r, "about", &render.TemplateData{})
 }
 
 // ShowLoginPage show login page
 func (m *Repository) ShowLoginPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "login", nil)
+	render.RenderPage(w, r, "login", &render.TemplateData{})
 }
 
 // PostLogin logic to login the user
@@ -61,16 +62,22 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	err = helpers.LoginValidation(fields)
 	if err != nil {
 		log.Println(err)
-		fields["error"] = err.Error()
-		render.RenderPage(w, r, "login", fields)
+		strErr := err.Error()
+		render.RenderPage(w, r, "login", &render.TemplateData{
+			StringMap: fields,
+			Error:     strErr,
+		})
 		return
 	}
 
 	user, err := database.Login(email, password)
 	if err != nil {
 		log.Println(err)
-		fields["error"] = err.Error()
-		render.RenderPage(w, r, "login", fields)
+		strErr := err.Error()
+		render.RenderPage(w, r, "login", &render.TemplateData{
+			StringMap: fields,
+			Error:     strErr,
+		})
 		return
 	}
 
@@ -78,10 +85,9 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	if user != (models.User{}) {
 		_ = m.App.Session.RenewToken(r.Context())
 
-		m.App.Session.Put(r.Context(), "userName", user.UserName)
-		m.App.Session.Put(r.Context(), "accessLevel", user.AccessLevel)
+		m.App.Session.Put(r.Context(), "user", user)
 
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 	}
 }
 
@@ -94,7 +100,7 @@ func (m *Repository) ShowLogoutPage(w http.ResponseWriter, r *http.Request) {
 
 // ShowNewUserPage show new-user page
 func (m *Repository) ShowNewUserPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "new-user", nil)
+	render.RenderPage(w, r, "new-user", &render.TemplateData{})
 }
 
 // PostNewUserPage add new user to DB
@@ -119,16 +125,22 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	err = helpers.NewUserValidation(fields)
 	if err != nil {
 		log.Println(err)
-		fields["error"] = err.Error()
-		render.RenderPage(w, r, "new-user", fields)
+		strErr := err.Error()
+		render.RenderPage(w, r, "login", &render.TemplateData{
+			StringMap: fields,
+			Error:     strErr,
+		})
 		return
 	}
 
 	err = database.AddUser(userName, email, password)
 	if err != nil {
 		log.Println(err)
-		fields["error"] = err.Error()
-		render.RenderPage(w, r, "new-user", fields)
+		strErr := err.Error()
+		render.RenderPage(w, r, "login", &render.TemplateData{
+			StringMap: fields,
+			Error:     strErr,
+		})
 		return
 	}
 
@@ -136,25 +148,47 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	user, err := database.Login(email, password)
 	if err != nil {
 		log.Println(err)
-		fields["error"] = err.Error()
-		render.RenderPage(w, r, "new-user", fields)
+		strErr := err.Error()
+		render.RenderPage(w, r, "login", &render.TemplateData{
+			StringMap: fields,
+			Error:     strErr,
+		})
 		return
 	}
 	if user != (models.User{}) {
 		_ = m.App.Session.RenewToken(r.Context())
-		m.App.Session.Put(r.Context(), "auth", user.AccessLevel)
 
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		m.App.Session.Put(r.Context(), "user", user)
+
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 	}
 }
 
 // ShowDashboardPage show dashboard page
 func (m *Repository) ShowDashboardPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "dashboard", nil)
+	render.RenderPage(w, r, "dashboard", &render.TemplateData{})
+}
+
+// ShowProfilePage show dashboard page
+func (m *Repository) ShowProfilePage(w http.ResponseWriter, r *http.Request) {
+	render.RenderPage(w, r, "profile", &render.TemplateData{})
 }
 
 // ShowAdminAllUsersPage show the administraation page with all the users
 func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Request) {
 	// TODO: display the users
-	render.RenderPage(w, r, "admin-all-users", nil)
+	users, err := database.GetAllUsers()
+	if err != nil {
+		log.Println(err)
+	}
+	datausers := make(map[string]interface{})
+	for i, u := range users {
+		index := strconv.Itoa(i)
+		datausers[index] = u
+	}
+	data := make(map[string]interface{})
+	data["users"] = datausers
+	render.RenderPage(w, r, "admin-all-users", &render.TemplateData{
+		Data: data,
+	})
 }

@@ -1,5 +1,29 @@
 {{template "base" .}}
-
 {{define "content"}}
 <h2>All users list</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>UserName</th>
+            <th>Email</th>
+            <th>Access Level</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range index .Data "users"}}
+        <tr>
+            <td>{{.ID}}</td>
+            <td>{{.UserName}}</td>
+            <td>{{.Email}}</td>
+            <td>
+                {{if ne .AccessLevel "3"}}
+                {{.AccessLevel}}
+                {{end}}
+            </td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
 {{end}}

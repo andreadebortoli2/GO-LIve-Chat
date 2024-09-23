@@ -8,8 +8,10 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
+	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
 	"github.com/justinas/nosurf"
 )
 
@@ -19,21 +21,65 @@ func NewRenderer(a *config.AppConfig) {
 	appConfig = a
 }
 
-// addData add data to template
-func addData(dataToAdd map[string]string, r *http.Request) map[string]string {
-	data := map[string]string{}
-	data["CSRFToken"] = nosurf.Token(r)
-	data["userName"] = appConfig.Session.GetString(r.Context(), "userName")
-	data["accessLevel"] = appConfig.Session.GetString(r.Context(), "accessLevel")
-	for k, v := range dataToAdd {
-		data[k] = v
-	}
-
-	return data
+type TemplateData struct {
+	StringMap  map[string]string
+	Error      string
+	Data       map[string]interface{}
+	CSRFToken  string
+	ActiveUser ActiveUser
 }
 
+type ActiveUser struct {
+	UserName    string
+	Email       string
+	AccessLevel int
+}
+
+func addDataToTemplate(td *TemplateData, r *http.Request) *TemplateData {
+	td.CSRFToken = nosurf.Token(r)
+	if appConfig.Session.Exists(r.Context(), "user") {
+
+		u, ok := appConfig.Session.Get(r.Context(), "user").(models.User)
+		if !ok {
+			log.Println("could not convert value to User")
+			return td
+		}
+		td.ActiveUser.UserName = u.UserName
+		td.ActiveUser.Email = u.Email
+		accLvl, err := strconv.Atoi(u.AccessLevel)
+		if err != nil {
+			log.Println("cannot convert access level")
+			td.ActiveUser.AccessLevel = 0
+		}
+		td.ActiveUser.AccessLevel = accLvl
+	}
+	return td
+}
+
+// addData add data to template
+/* func addDataToTemplate(data map[string]string, r *http.Request) map[string]string {
+
+	templateData := map[string]string{}
+
+	templateData["CSRFToken"] = nosurf.Token(r)
+
+	u, ok := appConfig.Session.Get(r.Context(), "user").(models.User)
+	if !ok {
+		log.Println("could not convert value to User")
+	}
+	templateData["userName"] = u.UserName
+	templateData["email"] = u.Email
+	templateData["accessLevel"] = u.AccessLevel
+
+	for k, v := range data {
+		templateData[k] = v
+	}
+
+	return templateData
+} */
+
 // RenderPage render the requested page
-func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handlerData map[string]string) error {
+func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handlerData *TemplateData) error {
 
 	pages, _ := pagesCache()
 
@@ -42,17 +88,19 @@ func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handler
 		return errors.New("page not found in cache")
 	}
 
-	data := addData(handlerData, r)
+	data := addDataToTemplate(handlerData, r)
 
 	buf := new(bytes.Buffer)
 
 	err := requestedPage.Execute(buf, data)
 	if err != nil {
+		log.Println("here", err)
 		return err
 	}
 
 	_, err = buf.WriteTo(w)
 	if err != nil {
+		log.Println("err:", err)
 		return err
 	}
 
