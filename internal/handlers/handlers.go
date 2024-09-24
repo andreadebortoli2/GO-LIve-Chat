@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/database"
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/helpers"
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/render"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/database"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/helpers"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/render"
 )
 
 var Repo *Repository

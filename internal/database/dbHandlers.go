@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 

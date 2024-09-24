@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/config"
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/justinas/nosurf"
 )
 

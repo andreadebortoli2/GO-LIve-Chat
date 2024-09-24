@@ -1,4 +1,4 @@
-module github.com/andreadebortoli2/GO-Experiment-and-Learn
+module github.com/andreadebortoli2/GO-Live-Chat
 
 go 1.23.1
 

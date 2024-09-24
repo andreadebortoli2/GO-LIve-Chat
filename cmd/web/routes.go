@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/handlers"
-	"github.com/andreadebortoli2/GO-Experiment-and-Learn/internal/models"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/handlers"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/justinas/nosurf"
