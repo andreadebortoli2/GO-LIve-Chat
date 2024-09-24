@@ -1,6 +1,8 @@
 {{template "base" .}}
-{{define "content"}}
+{{define "page_title"}}
 <h2>Register</h2>
+{{end}}
+{{define "content"}}
 
 {{if ne .Error ""}}
 <p style="color: orange;">{{.Error}}</p>
@@ -9,19 +11,27 @@
 {{$un := index .StringMap "user_name" }}
 {{$e := index .StringMap "email" }}
 
-<form action="/new-user" method="post">
+<div class="card-text">
+    <form action="/new-user" method="post">
 
-    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
-    <label for="user_name">User name</label>
-    <input type="text" name="user_name" id="user_name" value="{{$un}}" required>
+        <div class="mb-3">
+            <label for="user_name" class="form-label">User name</label>
+            <input type="text" class="form-control" name="user_name" id="user_name" value="{{$un}}" required>
+        </div>
 
-    <label for="email">Email</label>
-    <input type="email" name="email" id="email" value="{{$e}}" required>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" name="email" id="email" value="{{$e}}" required>
+        </div>
 
-    <label for="password">Password</label>
-    <input type="text" name="password" id="password" required>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" id="password" required>
+        </div>
 
-    <input type="submit" value="Register">
-</form>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+</div>
 {{end}}

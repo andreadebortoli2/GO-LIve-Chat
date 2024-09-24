@@ -32,11 +32,6 @@ func (m *Repository) ShowHomePage(w http.ResponseWriter, r *http.Request) {
 	render.RenderPage(w, r, "home", &render.TemplateData{})
 }
 
-// ShowAboutPage show about page
-func (m *Repository) ShowAboutPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "about", &render.TemplateData{})
-}
-
 // ShowLoginPage show login page
 func (m *Repository) ShowLoginPage(w http.ResponseWriter, r *http.Request) {
 	render.RenderPage(w, r, "login", &render.TemplateData{})

@@ -14,3 +14,4 @@ more info in the future....
 - use [GORM](https://gorm.io/) ORM library for GO
 - use [Pure-Go SQLite driver for GORM](https://github.com/glebarez/sqlite) SQLite3 driver for GORM written all in GO
 - use [govalidator](https://github.com/asaskevich/govalidator) to easily manage input validation
+- use [Bootstrap](https://getbootstrap.com/) for front end styling

@@ -1,6 +1,8 @@
 {{template "base" .}}
-{{define "content"}}
+{{define "page_title"}}
 <h2>Dashboard</h2>
-
-<p>Welcome <a href="/profile"><strong>{{.ActiveUser.UserName}}</strong></a></p>
+{{end}}
+{{define "content"}}
+<p class="card-text">Welcome <a class="btn btn-outline-info"
+        href="/profile"><strong>{{.ActiveUser.UserName}}</strong></a></p>
 {{end}}

@@ -1,23 +1,27 @@
 {{template "base" .}}
-{{define "content"}}
+{{define "page_title"}}
 <h2>Profile</h2>
-<ul>
-    <li>
-        Username: <strong>{{.ActiveUser.UserName}}</strong>
-    </li>
-    <li>
-        Email: <strong>{{.ActiveUser.Email}}</strong>
-    </li>
-    <li>
-        Access Level: <strong>
-            {{if eq .ActiveUser.AccessLevel 1}}
-            User
-            {{else if eq .ActiveUser.AccessLevel 2}}
-            Moderator
-            {{else if eq .ActiveUser.AccessLevel 3}}
-            Administrator
-            {{end}}
-        </strong>
-    </li>
-</ul>
+{{end}}
+{{define "content"}}
+<div class="card-text">
+    <ul class="list-group">
+        <li class="list-group-item list-group-item-primary">
+            Username: <strong>{{.ActiveUser.UserName}}</strong>
+        </li>
+        <li class="list-group-item list-group-item-success">
+            Email: <strong>{{.ActiveUser.Email}}</strong>
+        </li>
+        <li class="list-group-item list-group-item-info">
+            Access Level: <strong>
+                {{if eq .ActiveUser.AccessLevel 1}}
+                User
+                {{else if eq .ActiveUser.AccessLevel 2}}
+                Moderator
+                {{else if eq .ActiveUser.AccessLevel 3}}
+                Administrator
+                {{end}}
+            </strong>
+        </li>
+    </ul>
+</div>
 {{end}}
