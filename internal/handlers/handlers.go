@@ -55,23 +55,13 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 
 	err = helpers.LoginValidation(fields)
 	if err != nil {
-		log.Println(err)
-		strErr := err.Error()
-		render.RenderPage(w, r, "login", render.TemplateData{
-			StringMap: fields,
-			Error:     strErr,
-		})
+		helpers.RenderErr(err, w, r, "login", fields)
 		return
 	}
 
 	user, err := database.Login(email, password)
 	if err != nil {
-		log.Println(err)
-		strErr := err.Error()
-		render.RenderPage(w, r, "login", render.TemplateData{
-			StringMap: fields,
-			Error:     strErr,
-		})
+		helpers.RenderErr(err, w, r, "login", fields)
 		return
 	}
 
@@ -115,35 +105,20 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 
 	err = helpers.NewUserValidation(fields)
 	if err != nil {
-		log.Println(err)
-		strErr := err.Error()
-		render.RenderPage(w, r, "new-user", render.TemplateData{
-			StringMap: fields,
-			Error:     strErr,
-		})
+		helpers.RenderErr(err, w, r, "new-user", fields)
 		return
 	}
 
 	err = database.AddUser(userName, email, password)
 	if err != nil {
-		log.Println(err)
-		strErr := err.Error()
-		render.RenderPage(w, r, "new-user", render.TemplateData{
-			StringMap: fields,
-			Error:     strErr,
-		})
+		helpers.RenderErr(err, w, r, "new-user", fields)
 		return
 	}
 
 	// after correct registration immediatly login the user and redirect
 	user, err := database.Login(email, password)
 	if err != nil {
-		log.Println(err)
-		strErr := err.Error()
-		render.RenderPage(w, r, "login", render.TemplateData{
-			StringMap: fields,
-			Error:     strErr,
-		})
+		helpers.RenderErr(err, w, r, "login", fields)
 		return
 	}
 
@@ -169,7 +144,7 @@ func (m *Repository) ShowProfilePage(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Request) {
 	users, err := database.GetAllUsers()
 	if err != nil {
-		log.Println(err)
+		helpers.RenderErr(err, w, r, "admin-all-users", nil)
 	}
 	datausers := make(map[string]interface{})
 	for i, u := range users {

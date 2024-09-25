@@ -21,6 +21,9 @@
                 </tr>
             </thead>
             <tbody class="table-group-divider">
+                {{if ne .Error ""}}
+                <tr class="table-primary">{{.Error}}</tr>
+                {{else}}
                 {{range index .Data "users"}}
                 <tr class="table-primary">
                     <td scope="row">{{.ID}}</td>
@@ -47,6 +50,7 @@
                         {{end}}
                     </td>
                 </tr>
+                {{end}}
                 {{end}}
             </tbody>
         </table>
