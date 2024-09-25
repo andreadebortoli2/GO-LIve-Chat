@@ -29,12 +29,12 @@ func NewHandlers(r *Repository) {
 
 // ShowHomePage show home page
 func (m *Repository) ShowHomePage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "home", &render.TemplateData{})
+	render.RenderPage(w, r, "home", render.TemplateData{})
 }
 
 // ShowLoginPage show login page
 func (m *Repository) ShowLoginPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "login", &render.TemplateData{})
+	render.RenderPage(w, r, "login", render.TemplateData{})
 }
 
 // PostLogin logic to login the user
@@ -58,7 +58,7 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		strErr := err.Error()
-		render.RenderPage(w, r, "login", &render.TemplateData{
+		render.RenderPage(w, r, "login", render.TemplateData{
 			StringMap: fields,
 			Error:     strErr,
 		})
@@ -69,7 +69,7 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		strErr := err.Error()
-		render.RenderPage(w, r, "login", &render.TemplateData{
+		render.RenderPage(w, r, "login", render.TemplateData{
 			StringMap: fields,
 			Error:     strErr,
 		})
@@ -95,7 +95,7 @@ func (m *Repository) ShowLogoutPage(w http.ResponseWriter, r *http.Request) {
 
 // ShowNewUserPage show new-user page
 func (m *Repository) ShowNewUserPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "new-user", &render.TemplateData{})
+	render.RenderPage(w, r, "new-user", render.TemplateData{})
 }
 
 // PostNewUserPage add new user to DB
@@ -121,7 +121,7 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		strErr := err.Error()
-		render.RenderPage(w, r, "new-user", &render.TemplateData{
+		render.RenderPage(w, r, "new-user", render.TemplateData{
 			StringMap: fields,
 			Error:     strErr,
 		})
@@ -132,7 +132,7 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		strErr := err.Error()
-		render.RenderPage(w, r, "new-user", &render.TemplateData{
+		render.RenderPage(w, r, "new-user", render.TemplateData{
 			StringMap: fields,
 			Error:     strErr,
 		})
@@ -144,7 +144,7 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		strErr := err.Error()
-		render.RenderPage(w, r, "login", &render.TemplateData{
+		render.RenderPage(w, r, "login", render.TemplateData{
 			StringMap: fields,
 			Error:     strErr,
 		})
@@ -161,12 +161,12 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 
 // ShowDashboardPage show dashboard page
 func (m *Repository) ShowDashboardPage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "dashboard", &render.TemplateData{})
+	render.RenderPage(w, r, "dashboard", render.TemplateData{})
 }
 
 // ShowProfilePage show dashboard page
 func (m *Repository) ShowProfilePage(w http.ResponseWriter, r *http.Request) {
-	render.RenderPage(w, r, "profile", &render.TemplateData{})
+	render.RenderPage(w, r, "profile", render.TemplateData{})
 }
 
 // ShowAdminAllUsersPage show the administraation page with all the users
@@ -182,7 +182,7 @@ func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Reques
 	}
 	data := make(map[string]interface{})
 	data["users"] = datausers
-	render.RenderPage(w, r, "admin-all-users", &render.TemplateData{
+	render.RenderPage(w, r, "admin-all-users", render.TemplateData{
 		Data: data,
 	})
 }

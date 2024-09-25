@@ -35,7 +35,7 @@ type ActiveUser struct {
 	AccessLevel int
 }
 
-func addDataToTemplate(td *TemplateData, r *http.Request) *TemplateData {
+func addDataToTemplate(td TemplateData, r *http.Request) TemplateData {
 	td.CSRFToken = nosurf.Token(r)
 	if appConfig.Session.Exists(r.Context(), "user") {
 
@@ -56,30 +56,8 @@ func addDataToTemplate(td *TemplateData, r *http.Request) *TemplateData {
 	return td
 }
 
-// addData add data to template
-/* func addDataToTemplate(data map[string]string, r *http.Request) map[string]string {
-
-	templateData := map[string]string{}
-
-	templateData["CSRFToken"] = nosurf.Token(r)
-
-	u, ok := appConfig.Session.Get(r.Context(), "user").(models.User)
-	if !ok {
-		log.Println("could not convert value to User")
-	}
-	templateData["userName"] = u.UserName
-	templateData["email"] = u.Email
-	templateData["accessLevel"] = u.AccessLevel
-
-	for k, v := range data {
-		templateData[k] = v
-	}
-
-	return templateData
-} */
-
 // RenderPage render the requested page
-func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handlerData *TemplateData) error {
+func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handlerData TemplateData) error {
 
 	pages, _ := pagesCache()
 
