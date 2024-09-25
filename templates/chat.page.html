@@ -1,0 +1,30 @@
+{{template "base" .}}
+{{define "page_title"}}
+<h2>Chat</h2>
+{{end}}
+{{define "content"}}
+
+{{$actId := .ActiveUser.ID}}
+
+{{range index .Data "messages"}}
+{{if eq .User.ID $actId}}
+<div class="d-flex justify-content-end">
+    <div class="card w-75 mb-3 text-end">
+        <div class="card-body">
+            <h6 class="card-title">{{.User.UserName}}</h6>
+            <p class="card-text">{{.Content}}</p>
+        </div>
+    </div>
+</div>
+{{else}}
+<div class="d-flex justify-content-start">
+    <div class="card w-75 mb-3">
+        <div class="card-body">
+            <h6 class="card-title">{{.User.UserName}}</h6>
+            <p class="card-text">{{.Content}}</p>
+        </div>
+    </div>
+</div>
+{{end}}
+{{end}}
+{{end}}

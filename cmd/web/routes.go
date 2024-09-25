@@ -37,6 +37,7 @@ func Router() *chi.Mux {
 
 		r.Get("/dashboard", handlers.Repo.ShowDashboardPage)
 		r.Get("/profile", handlers.Repo.ShowProfilePage)
+		r.Get("/chat", handlers.Repo.ShowChatPage)
 
 		// restricted admin routes
 		r.Route("/admin", func(r chi.Router) {

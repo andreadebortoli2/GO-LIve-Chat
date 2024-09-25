@@ -65,18 +65,19 @@ func AddUser(userName, email, password string) error {
 
 func GetAllUsers() ([]models.User, error) {
 	var users []models.User
-	result := []models.User{}
-	// tx := dbConn.SQLite3.Raw("SELECT * FROM users ORDER BY id").Scan(&result)
+	// result := []models.User{}
+	// tx := dbConn.SQLite3.Raw("SELECT * FROM users ORDER BY id")
 	// GORM syntax to not get soft deleted users
-	tx := dbConn.SQLite3.Find(&users).Order("id").Scan(&result)
+	tx := dbConn.SQLite3.Find(&users).Order("id")
 	if err := tx.Error; err != nil {
 		log.Println(err)
-		return result, errors.New("cannot find the users into the database")
+		return users, errors.New("cannot find the users into the database")
 	}
 	if tx.RowsAffected <= 0 {
-		return result, errors.New("users not found")
+		return users, errors.New("users not found")
 	}
-	return result, nil
+
+	return users, nil
 }
 
 func SetModerator(accLvl string, id string) error {
@@ -121,4 +122,19 @@ func DeleteUserByID(id string) error {
 		return errors.New("user not deleted")
 	}
 	return nil
+}
+
+func GetAllMessages() ([]models.Message, error) {
+	var messages []models.Message
+
+	tx := dbConn.SQLite3.Preload("User").Find(&messages)
+	if err := tx.Error; err != nil {
+		log.Println(err)
+		return messages, err
+	}
+	if tx.RowsAffected <= 0 {
+		return messages, errors.New("user not deleted")
+	}
+
+	return messages, nil
 }

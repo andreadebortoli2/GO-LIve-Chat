@@ -1,4 +1,4 @@
-##### Buiding a web app with differnt components to experiment and learn
+##### Buiding a web app with live chat
 
 more info in the future....
 

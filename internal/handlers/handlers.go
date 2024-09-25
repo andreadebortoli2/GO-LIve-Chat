@@ -192,3 +192,27 @@ func (m *Repository) PostDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
 }
+
+func (m *Repository) ShowChatPage(w http.ResponseWriter, r *http.Request) {
+
+	messages, err := database.GetAllMessages()
+	if err != nil {
+		log.Println(err)
+	}
+
+	dataMessages := make(map[string]interface{})
+	for i, m := range messages {
+		index := strconv.Itoa(i)
+		// add 0 to single digit index for a correct display on page
+		if len(index) == 1 {
+			index = "0" + index
+		}
+		dataMessages[index] = m
+	}
+	data := make(map[string]interface{})
+	data["messages"] = dataMessages
+
+	render.RenderPage(w, r, "chat", render.TemplateData{
+		Data: data,
+	})
+}

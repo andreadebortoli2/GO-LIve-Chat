@@ -30,6 +30,7 @@ type TemplateData struct {
 }
 
 type ActiveUser struct {
+	ID          uint
 	UserName    string
 	Email       string
 	AccessLevel int
@@ -44,6 +45,7 @@ func addDataToTemplate(td TemplateData, r *http.Request) TemplateData {
 			log.Println("could not convert value to User")
 			return td
 		}
+		td.ActiveUser.ID = u.ID
 		td.ActiveUser.UserName = u.UserName
 		td.ActiveUser.Email = u.Email
 		accLvl, err := strconv.Atoi(u.AccessLevel)
