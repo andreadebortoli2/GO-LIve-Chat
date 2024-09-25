@@ -8,7 +8,6 @@ import (
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/database"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/helpers"
-	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/render"
 )
 
@@ -76,14 +75,11 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if a user is returned give the authorization saving auth level in the session
-	if user != (models.User{}) {
-		_ = m.App.Session.RenewToken(r.Context())
+	_ = m.App.Session.RenewToken(r.Context())
 
-		m.App.Session.Put(r.Context(), "user", user)
+	m.App.Session.Put(r.Context(), "user", user)
 
-		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-	}
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
 // ShowLogoutPage logic to logout the user
@@ -150,13 +146,13 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	if user != (models.User{}) {
-		_ = m.App.Session.RenewToken(r.Context())
 
-		m.App.Session.Put(r.Context(), "user", user)
+	_ = m.App.Session.RenewToken(r.Context())
 
-		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-	}
+	m.App.Session.Put(r.Context(), "user", user)
+
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+
 }
 
 // ShowDashboardPage show dashboard page
@@ -194,6 +190,7 @@ func (m *Repository) PostChangeAccessLevel(w http.ResponseWriter, r *http.Reques
 		http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
 		return
 	}
+
 	accLvl := r.Form.Get("moderator")
 	userID := r.Form.Get("user-id")
 

@@ -21,9 +21,10 @@ func Login(email, password string) (models.User, error) {
 		return result, errors.New("cannot find the user into the database")
 	}
 
-	if result.Password == "" {
+	if tx.RowsAffected <= 0 {
 		return result, errors.New("user not registrered")
 	}
+
 	err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password))
 	if err != nil {
 		log.Println(err)
@@ -55,6 +56,10 @@ func AddUser(userName, email, password string) error {
 		return fmt.Errorf("a user with this %s already exist", es2[0])
 	}
 
+	if result.RowsAffected <= 0 {
+		return errors.New("database error, user not registrered")
+	}
+
 	return nil
 }
 
@@ -68,6 +73,9 @@ func GetAllUsers() ([]models.User, error) {
 		log.Println(err)
 		return result, errors.New("cannot find the users into the database")
 	}
+	if tx.RowsAffected <= 0 {
+		return result, errors.New("users not found")
+	}
 	return result, nil
 }
 
@@ -77,6 +85,9 @@ func SetModerator(accLvl string, id string) error {
 	if err := tx.Error; err != nil {
 		log.Println(err)
 		return err
+	}
+	if tx.RowsAffected <= 0 {
+		return errors.New("user not found")
 	}
 
 	var accLvlReverse string
@@ -93,6 +104,9 @@ func SetModerator(accLvl string, id string) error {
 		log.Println(err)
 		return err
 	}
+	if tx.RowsAffected <= 0 {
+		return errors.New("user not updated")
+	}
 
 	return nil
 }
@@ -102,6 +116,9 @@ func DeleteUserByID(id string) error {
 	if err := tx.Error; err != nil {
 		log.Println(err)
 		return err
+	}
+	if tx.RowsAffected <= 0 {
+		return errors.New("user not deleted")
 	}
 	return nil
 }

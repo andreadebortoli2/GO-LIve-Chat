@@ -16,7 +16,9 @@ type DB struct {
 
 var dbConn = &DB{}
 
-var user *models.User
+// db tables
+var users *models.User
+var messages *models.Message
 
 func ConnectDB() (*DB, error) {
 	db, err := gorm.Open(sqlite.Open("GO_exp_learn.db"), &gorm.Config{})
@@ -33,7 +35,7 @@ func ConnectDB() (*DB, error) {
 // execMigrations execute all the migrations
 func execMigrations(db *gorm.DB) {
 	// add all models's structs to AutoMigrate
-	db.AutoMigrate(&user)
+	db.AutoMigrate(&users, &messages)
 }
 
 func userSeeder(db *gorm.DB) {
