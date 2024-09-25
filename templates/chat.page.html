@@ -6,12 +6,15 @@
 
 {{$actId := .ActiveUser.ID}}
 
+<!-- placeholder -->
+<button>get older messages (attribute last printed message id or count of displayed messages)</button>
+
 {{range index .Data "messages"}}
 {{if eq .User.ID $actId}}
 <div class="d-flex justify-content-end">
     <div class="card w-75 mb-3 text-end">
         <div class="card-body">
-            <h6 class="card-title">{{.User.UserName}}</h6>
+            <h6 class="card-title">{{.User.UserName}} {{.ID}}</h6>
             <p class="card-text">{{.Content}}</p>
         </div>
     </div>
@@ -20,7 +23,7 @@
 <div class="d-flex justify-content-start">
     <div class="card w-75 mb-3">
         <div class="card-body">
-            <h6 class="card-title">{{.User.UserName}}</h6>
+            <h6 class="card-title">{{.User.UserName}} {{.ID}}</h6>
             <p class="card-text">{{.Content}}</p>
         </div>
     </div>

@@ -124,16 +124,31 @@ func DeleteUserByID(id string) error {
 	return nil
 }
 
-func GetAllMessages() ([]models.Message, error) {
+func GetLastMessages() ([]models.Message, error) {
 	var messages []models.Message
 
-	tx := dbConn.SQLite3.Preload("User").Find(&messages)
+	tx := dbConn.SQLite3.Limit(5).Preload("User").Find(&messages)
 	if err := tx.Error; err != nil {
 		log.Println(err)
 		return messages, err
 	}
 	if tx.RowsAffected <= 0 {
-		return messages, errors.New("user not deleted")
+		return messages, errors.New("messages not found")
+	}
+
+	return messages, nil
+}
+
+func GetOlderMessages(offset int) ([]models.Message, error) {
+	var messages []models.Message
+
+	tx := dbConn.SQLite3.Limit(5).Offset(offset).Preload("User").Find(&messages)
+	if err := tx.Error; err != nil {
+		log.Println(err)
+		return messages, err
+	}
+	if tx.RowsAffected <= 0 {
+		return messages, errors.New("messages not found")
 	}
 
 	return messages, nil

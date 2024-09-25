@@ -127,7 +127,6 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Put(r.Context(), "user", user)
 
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-
 }
 
 // ShowDashboardPage show dashboard page
@@ -135,12 +134,12 @@ func (m *Repository) ShowDashboardPage(w http.ResponseWriter, r *http.Request) {
 	render.RenderPage(w, r, "dashboard", render.TemplateData{})
 }
 
-// ShowProfilePage show dashboard page
+// ShowProfilePage show user profile page
 func (m *Repository) ShowProfilePage(w http.ResponseWriter, r *http.Request) {
 	render.RenderPage(w, r, "profile", render.TemplateData{})
 }
 
-// ShowAdminAllUsersPage show the administraation page with all the users
+// ShowAdminAllUsersPage show the administration page with all the users
 func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Request) {
 	users, err := database.GetAllUsers()
 	if err != nil {
@@ -158,6 +157,7 @@ func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Reques
 	})
 }
 
+// PostChangeAccessLevel modify the access level of a selected user
 func (m *Repository) PostChangeAccessLevel(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -178,6 +178,7 @@ func (m *Repository) PostChangeAccessLevel(w http.ResponseWriter, r *http.Reques
 	http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
 }
 
+// PostDeleteUser delete a selected user
 func (m *Repository) PostDeleteUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -193,11 +194,13 @@ func (m *Repository) PostDeleteUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
 }
 
+// ShowChatPage show the chat page with last messages
 func (m *Repository) ShowChatPage(w http.ResponseWriter, r *http.Request) {
 
-	messages, err := database.GetAllMessages()
+	messages, err := database.GetLastMessages()
 	if err != nil {
-		log.Println(err)
+		helpers.RenderErr(err, w, r, "chat", nil)
+		return
 	}
 
 	dataMessages := make(map[string]interface{})
@@ -215,4 +218,35 @@ func (m *Repository) ShowChatPage(w http.ResponseWriter, r *http.Request) {
 	render.RenderPage(w, r, "chat", render.TemplateData{
 		Data: data,
 	})
+}
+
+func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+		return
+	}
+
+	last := r.Form.Get("last-message-loaded")
+
+	offset, err := strconv.Atoi(last)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+		return
+	}
+
+	messages, err := database.GetOlderMessages(offset)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+		return
+	}
+
+	for _, m := range messages {
+		log.Println(m.ID)
+	}
+
+	// * return HTMX
 }
