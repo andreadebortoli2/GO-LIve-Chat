@@ -247,7 +247,7 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 		if m.User.ID == activeUserID {
 			msgsHTMLstr = fmt.Sprintf(
 				`<div class="d-flex justify-content-end">
-				<div class="card w-75 mb-3 text-end">
+				<div class="card w-75 mb-3 text-end bg-warning-subtle">
 					<div class="card-body">
 						<h6 class="card-title">%s</h6>
 						<p class="card-text">%s</p>
@@ -258,7 +258,7 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 		} else {
 			msgsHTMLstr = fmt.Sprintf(
 				`<div class="d-flex justify-content-start">
-				<div class="card w-75 mb-3 text-start">
+				<div class="card w-75 mb-3 text-start bg-success-subtle">
 					<div class="card-body">
 						<h6 class="card-title">%s</h6>
 						<p class="card-text">%s</p>
@@ -273,5 +273,46 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 
 	// return with HTMX
 	templ, _ := template.New("t").Parse(msgstempl)
+	templ.Execute(w, nil)
+}
+
+func (m *Repository) PostNewMessage(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+		return
+	}
+
+	userId := r.Form.Get("user-id")
+	msg := r.Form.Get("message-content")
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+		return
+	}
+
+	err = database.PostNewMessage(userIdInt, msg)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+		return
+	}
+
+	u := Repo.App.Session.Get(r.Context(), "user").(models.User)
+	msgStr := fmt.Sprintf(
+		`<div class="d-flex justify-content-end">
+				<div class="card w-75 mb-3 text-end bg-warning-subtle">
+					<div class="card-body">
+						<h6 class="card-title">%s</h6>
+						<p class="card-text">%s</p>
+					</div>
+				</div>
+			</div>
+		`, u.UserName, msg)
+
+	// return with HTMX
+	templ, _ := template.New("t").Parse(msgStr)
 	templ.Execute(w, nil)
 }

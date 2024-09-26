@@ -20,9 +20,10 @@
     <script src="https://unpkg.com/htmx.org@2.0.2"
         integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
         crossorigin="anonymous"></script>
+
 </head>
 
-<body>
+<body class="bg-body-tertiary">
 
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
@@ -69,11 +70,11 @@
     <main>
         <div class="container mt-4">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header bg-secondary-subtle">
                     {{block "page_title" .}}
                     {{end}}
                 </div>
-                <div class="card-body">
+                <div class="card-body bg-info-subtle">
                     {{block "content" .}}
                     {{end}}
                 </div>

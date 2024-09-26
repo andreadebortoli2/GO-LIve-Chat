@@ -11,6 +11,7 @@ import (
 )
 
 var bcryptCost = 12
+var numInitMsg = 5
 
 // Login return the user if exist
 func Login(email, password string) (models.User, error) {
@@ -127,7 +128,7 @@ func DeleteUserByID(id string) error {
 func GetLastMessages() ([]models.Message, error) {
 	var messages []models.Message
 
-	tx := dbConn.SQLite3.Order("id DESC").Limit(5).Preload("User").Find(&messages)
+	tx := dbConn.SQLite3.Order("id DESC").Limit(numInitMsg).Preload("User").Find(&messages)
 	if err := tx.Error; err != nil {
 		log.Println(err)
 		return messages, err
@@ -146,7 +147,11 @@ func GetLastMessages() ([]models.Message, error) {
 func GetOlderMessages() ([]models.Message, error) {
 	var messages []models.Message
 
-	tx := dbConn.SQLite3.Offset(5).Preload("User").Find(&messages)
+	var count int64
+	dbConn.SQLite3.Model(&messages).Count(&count)
+	numMsgToGet := count - int64(numInitMsg)
+
+	tx := dbConn.SQLite3.Limit(int(numMsgToGet)).Preload("User").Find(&messages)
 	if err := tx.Error; err != nil {
 		log.Println(err)
 		return messages, err
@@ -156,4 +161,23 @@ func GetOlderMessages() ([]models.Message, error) {
 	}
 
 	return messages, nil
+}
+
+func PostNewMessage(id int, msg string) error {
+
+	newMsg := models.Message{
+		Content: msg,
+		UserID:  uint64(id),
+	}
+
+	result := dbConn.SQLite3.Create(&newMsg)
+	if err := result.Error; err != nil {
+		return errors.New("database error posting message")
+	}
+
+	if result.RowsAffected <= 0 {
+		return errors.New("database error, message not posted")
+	}
+
+	return nil
 }
