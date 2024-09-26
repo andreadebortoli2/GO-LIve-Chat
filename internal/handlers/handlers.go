@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"text/template"
 
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/database"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/helpers"
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/render"
 )
 
@@ -228,25 +231,47 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	last := r.Form.Get("last-message-loaded")
-
-	offset, err := strconv.Atoi(last)
+	messages, err := database.GetOlderMessages()
 	if err != nil {
 		log.Println(err)
 		http.Redirect(w, r, "/chat", http.StatusSeeOther)
 		return
 	}
 
-	messages, err := database.GetOlderMessages(offset)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/chat", http.StatusSeeOther)
-		return
-	}
+	var msgstempl string
 
 	for _, m := range messages {
-		log.Println(m.ID)
+		u := Repo.App.Session.Get(r.Context(), "user").(models.User)
+		activeUserID := u.ID
+		var msgsHTMLstr string
+		if m.User.ID == activeUserID {
+			msgsHTMLstr = fmt.Sprintf(
+				`<div class="d-flex justify-content-end">
+				<div class="card w-75 mb-3 text-end">
+					<div class="card-body">
+						<h6 class="card-title">%s</h6>
+						<p class="card-text">%s</p>
+					</div>
+				</div>
+			</div>
+		`, m.User.UserName, m.Content)
+		} else {
+			msgsHTMLstr = fmt.Sprintf(
+				`<div class="d-flex justify-content-start">
+				<div class="card w-75 mb-3 text-start">
+					<div class="card-body">
+						<h6 class="card-title">%s</h6>
+						<p class="card-text">%s</p>
+					</div>
+				</div>
+			</div>
+		`, m.User.UserName, m.Content)
+		}
+
+		msgstempl += msgsHTMLstr
 	}
 
-	// * return HTMX
+	// return with HTMX
+	templ, _ := template.New("t").Parse(msgstempl)
+	templ.Execute(w, nil)
 }

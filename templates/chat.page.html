@@ -6,28 +6,39 @@
 
 {{$actId := .ActiveUser.ID}}
 
-<!-- placeholder -->
-<button>get older messages (attribute last printed message id or count of displayed messages)</button>
 
-{{range index .Data "messages"}}
-{{if eq .User.ID $actId}}
-<div class="d-flex justify-content-end">
-    <div class="card w-75 mb-3 text-end">
-        <div class="card-body">
-            <h6 class="card-title">{{.User.UserName}} {{.ID}}</h6>
-            <p class="card-text">{{.Content}}</p>
+<div id="messages-board">
+
+    <!-- <form class="text-center mb-4" hx-get="/older-messages" hx-target="#messages-board" hx-swap="afterbegin"> -->
+    <form class="text-center mb-4" hx-get="/older-messages">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <button class="btn btn-primary" type="submit"><i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+    </form>
+
+    {{range index .Data "messages"}}
+
+    {{if eq .User.ID $actId}}
+    <div class="d-flex justify-content-end">
+        <div class="card w-75 mb-3 text-end">
+            <div class="card-body">
+                <h6 class="card-title">{{.User.UserName}}</h6>
+                <p class="card-text">{{.Content}}</p>
+            </div>
         </div>
     </div>
-</div>
-{{else}}
-<div class="d-flex justify-content-start">
-    <div class="card w-75 mb-3">
-        <div class="card-body">
-            <h6 class="card-title">{{.User.UserName}} {{.ID}}</h6>
-            <p class="card-text">{{.Content}}</p>
+    {{else}}
+    <div class="d-flex justify-content-start">
+        <div class="card w-75 mb-3">
+            <div class="card-body">
+                <h6 class="card-title">{{.User.UserName}}</h6>
+                <p class="card-text">{{.Content}}</p>
+            </div>
         </div>
     </div>
+    {{end}}
+
+    {{end}}
+
 </div>
-{{end}}
-{{end}}
+
 {{end}}

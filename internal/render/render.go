@@ -105,11 +105,13 @@ func pagesCache() (map[string]*template.Template, error) {
 			log.Println("can't parse the page", err)
 			return pagesCache, err
 		}
+
 		parsePage, err = parsePage.ParseFiles("./templates/base.layout.html")
 		if err != nil {
 			log.Println("can't parse the layout", err)
 			return pagesCache, err
 		}
+
 		pagesCache[name] = parsePage
 	}
 
