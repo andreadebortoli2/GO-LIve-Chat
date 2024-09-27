@@ -39,7 +39,8 @@ func Router() *chi.Mux {
 		r.Get("/profile", handlers.Repo.ShowProfilePage)
 		r.Get("/chat", handlers.Repo.ShowChatPage)
 		r.Get("/older-messages", handlers.Repo.ShowOlderMessages)
-		r.Post("/new-message", handlers.Repo.PostNewMessage)
+		// r.Post("/new-message", handlers.Repo.PostNewMessage) removed to use websocket
+		r.Get("/ws", handlers.Repo.WebsocketHandler)
 
 		// restricted admin routes
 		r.Route("/admin", func(r chi.Router) {

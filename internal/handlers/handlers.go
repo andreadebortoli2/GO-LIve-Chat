@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/helpers"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/render"
+	"github.com/gorilla/websocket"
 )
 
 var Repo *Repository
@@ -223,6 +225,7 @@ func (m *Repository) ShowChatPage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// ShowOlderMessages show older messages without reloading the page
 func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -276,7 +279,8 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 	templ.Execute(w, nil)
 }
 
-func (m *Repository) PostNewMessage(w http.ResponseWriter, r *http.Request) {
+// PostNewMessage post the message sent from chat removed
+/* func (m *Repository) PostNewMessage(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Println(err)
@@ -315,4 +319,73 @@ func (m *Repository) PostNewMessage(w http.ResponseWriter, r *http.Request) {
 	// return with HTMX
 	templ, _ := template.New("t").Parse(msgStr)
 	templ.Execute(w, nil)
+} */
+
+// WebsocketHandler listeh to page via websocket, save new message into the db and display on every client
+func (m *Repository) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := database.Upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	database.Clients = append(database.Clients, *conn)
+
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			http.Redirect(w, r, "/chat", http.StatusSeeOther)
+			return
+		}
+
+		// log.Println(string(msg))
+		msgAdd := conn.RemoteAddr()
+		var message map[string]string
+		json.Unmarshal(msg, &message)
+
+		userIdInt, err := strconv.Atoi(message["user-id"])
+		if err != nil {
+			log.Println(err)
+			http.Redirect(w, r, "/chat", http.StatusSeeOther)
+			return
+		}
+
+		err = database.PostNewMessage(userIdInt, message["message-content"])
+		if err != nil {
+			log.Println(err)
+			http.Redirect(w, r, "/chat", http.StatusSeeOther)
+			return
+		}
+
+		for _, c := range database.Clients {
+			var msgStr string
+			if msgAdd.String() == c.RemoteAddr().String() {
+				msgStr = fmt.Sprintf(`
+					<div class="d-flex justify-content-end">
+						<div class="card w-75 mb-3 text-end bg-warning-subtle">
+							<div class="card-body">
+								<h6 class="card-title">%s</h6>
+								<p class="card-text">%s</p>
+							</div>
+						</div>
+					</div>
+				`, message["user-username"], message["message-content"])
+			} else {
+				msgStr = fmt.Sprintf(`
+					<div class="d-flex justify-content-start">
+						<div class="card w-75 mb-3 text-start bg-success-subtle">
+							<div class="card-body">
+								<h6 class="card-title">%s</h6>
+								<p class="card-text">%s</p>
+							</div>
+						</div>
+					</div>
+				`, message["user-username"], message["message-content"])
+			}
+			if err = c.WriteMessage(websocket.TextMessage, []byte(msgStr)); err != nil {
+				http.Redirect(w, r, "/chat", http.StatusSeeOther)
+				return
+			}
+		}
+	}
 }

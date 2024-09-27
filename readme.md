@@ -16,3 +16,4 @@ more info in the future....
 - use [govalidator](https://github.com/asaskevich/govalidator) to easily manage input validation
 - use [Bootstrap](https://getbootstrap.com/) for front end styling
 - use [</> htmx](https://htmx.org/) to execute form requests without reloading the page
+- use [Gorilla WebSocket](https://github.com/gorilla/websocket) for chat live load

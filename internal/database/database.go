@@ -6,6 +6,7 @@ import (
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/glebarez/sqlite"
+	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +16,13 @@ type DB struct {
 }
 
 var dbConn = &DB{}
+
+// websocket
+var Upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+var Clients []websocket.Conn
 
 // db tables
 var users *models.User
