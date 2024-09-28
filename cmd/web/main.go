@@ -40,7 +40,7 @@ func main() {
 
 	appConfig.Session = session
 
-	repo := handlers.NewRepo(&appConfig)
+	repo := handlers.NewRepo(&appConfig, db)
 	handlers.NewHandlers(repo)
 	render.NewRenderer(&appConfig)
 

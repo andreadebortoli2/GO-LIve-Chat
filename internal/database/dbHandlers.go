@@ -14,7 +14,7 @@ var bcryptCost = 12
 var numInitMsg = 5
 
 // Login return the user if exist
-func Login(email, password string) (models.User, error) {
+func (m *DB) Login(email, password string) (models.User, error) {
 	var result models.User
 	tx := dbConn.SQLite3.Table("users").Select("*").Where("email = ?", email).Scan(&result)
 	if err := tx.Error; err != nil {
@@ -35,7 +35,7 @@ func Login(email, password string) (models.User, error) {
 }
 
 // AddUser add new user to db
-func AddUser(userName, email, password string) error {
+func (m *DB) AddUser(userName, email, password string) error {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	if err != nil {
@@ -64,7 +64,7 @@ func AddUser(userName, email, password string) error {
 	return nil
 }
 
-func GetAllUsers() ([]models.User, error) {
+func (m *DB) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	// result := []models.User{}
 	// tx := dbConn.SQLite3.Raw("SELECT * FROM users ORDER BY id")
@@ -81,7 +81,7 @@ func GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func SetModerator(accLvl string, id string) error {
+func (m *DB) SetModerator(accLvl string, id string) error {
 	var user models.User
 	tx := dbConn.SQLite3.First(&user, id)
 	if err := tx.Error; err != nil {
@@ -113,7 +113,7 @@ func SetModerator(accLvl string, id string) error {
 	return nil
 }
 
-func DeleteUserByID(id string) error {
+func (m *DB) DeleteUserByID(id string) error {
 	tx := dbConn.SQLite3.Delete(&models.User{}, id)
 	if err := tx.Error; err != nil {
 		log.Println(err)
@@ -125,7 +125,7 @@ func DeleteUserByID(id string) error {
 	return nil
 }
 
-func GetLastMessages() ([]models.Message, error) {
+func (m *DB) GetLastMessages() ([]models.Message, error) {
 	var messages []models.Message
 
 	tx := dbConn.SQLite3.Order("id DESC").Limit(numInitMsg).Preload("User").Find(&messages)
@@ -144,7 +144,7 @@ func GetLastMessages() ([]models.Message, error) {
 	return messages, nil
 }
 
-func GetOlderMessages() ([]models.Message, error) {
+func (m *DB) GetOlderMessages() ([]models.Message, error) {
 	var messages []models.Message
 
 	var count int64
@@ -163,7 +163,7 @@ func GetOlderMessages() ([]models.Message, error) {
 	return messages, nil
 }
 
-func PostNewMessage(id int, msg string) error {
+func (m *DB) PostNewMessage(id int, msg string) error {
 
 	newMsg := models.Message{
 		Content: msg,

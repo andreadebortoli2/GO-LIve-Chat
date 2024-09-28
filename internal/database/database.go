@@ -15,7 +15,14 @@ type DB struct {
 	AppConfig *config.AppConfig
 }
 
+type testDB struct {
+	SQLite3   *gorm.DB
+	AppConfig *config.AppConfig
+}
+
 var dbConn = &DB{}
+
+var testdbConn = &testDB{}
 
 // websocket
 var Upgrader = websocket.Upgrader{

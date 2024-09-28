@@ -20,11 +20,13 @@ var Repo *Repository
 
 type Repository struct {
 	App *config.AppConfig
+	db  database.DB
 }
 
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, db *database.DB) *Repository {
 	return &Repository{
 		App: a,
+		db:  *db,
 	}
 }
 func NewHandlers(r *Repository) {
@@ -64,7 +66,7 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := database.Login(email, password)
+	user, err := m.db.Login(email, password)
 	if err != nil {
 		helpers.RenderErr(err, w, r, "login", fields)
 		return
@@ -114,14 +116,14 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddUser(userName, email, password)
+	err = m.db.AddUser(userName, email, password)
 	if err != nil {
 		helpers.RenderErr(err, w, r, "new-user", fields)
 		return
 	}
 
 	// after correct registration immediatly login the user and redirect
-	user, err := database.Login(email, password)
+	user, err := m.db.Login(email, password)
 	if err != nil {
 		helpers.RenderErr(err, w, r, "login", fields)
 		return
@@ -146,7 +148,7 @@ func (m *Repository) ShowProfilePage(w http.ResponseWriter, r *http.Request) {
 
 // ShowAdminAllUsersPage show the administration page with all the users
 func (m *Repository) ShowAdminAllUsersPage(w http.ResponseWriter, r *http.Request) {
-	users, err := database.GetAllUsers()
+	users, err := m.db.GetAllUsers()
 	if err != nil {
 		helpers.RenderErr(err, w, r, "admin-all-users", nil)
 	}
@@ -174,7 +176,7 @@ func (m *Repository) PostChangeAccessLevel(w http.ResponseWriter, r *http.Reques
 	accLvl := r.Form.Get("moderator")
 	userID := r.Form.Get("user-id")
 
-	err = database.SetModerator(accLvl, userID)
+	err = m.db.SetModerator(accLvl, userID)
 	if err != nil {
 		log.Println(err)
 		http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
@@ -194,7 +196,7 @@ func (m *Repository) PostDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.Form.Get("user-id")
 
-	database.DeleteUserByID(userID)
+	m.db.DeleteUserByID(userID)
 
 	http.Redirect(w, r, "/admin/all-users", http.StatusSeeOther)
 }
@@ -202,7 +204,7 @@ func (m *Repository) PostDeleteUser(w http.ResponseWriter, r *http.Request) {
 // ShowChatPage show the chat page with last messages
 func (m *Repository) ShowChatPage(w http.ResponseWriter, r *http.Request) {
 
-	messages, err := database.GetLastMessages()
+	messages, err := m.db.GetLastMessages()
 	if err != nil {
 		helpers.RenderErr(err, w, r, "chat", nil)
 		return
@@ -234,7 +236,7 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messages, err := database.GetOlderMessages()
+	messages, err := m.db.GetOlderMessages()
 	if err != nil {
 		log.Println(err)
 		http.Redirect(w, r, "/chat", http.StatusSeeOther)
@@ -297,7 +299,7 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.PostNewMessage(userIdInt, msg)
+	err = m.db.PostNewMessage(userIdInt, msg)
 	if err != nil {
 		log.Println(err)
 		http.Redirect(w, r, "/chat", http.StatusSeeOther)
@@ -350,7 +352,7 @@ func (m *Repository) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = database.PostNewMessage(userIdInt, message["message-content"])
+		err = m.db.PostNewMessage(userIdInt, message["message-content"])
 		if err != nil {
 			log.Println(err)
 			http.Redirect(w, r, "/chat", http.StatusSeeOther)
