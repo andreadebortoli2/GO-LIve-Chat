@@ -44,7 +44,7 @@ func main() {
 	handlers.NewHandlers(repo)
 	render.NewRenderer(&appConfig)
 
-	router := Router()
+	router := Router(&appConfig)
 
 	fmt.Println("serving on port 8080")
 	_ = http.ListenAndServe(":8080", router)

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/handlers"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/go-chi/chi/middleware"
@@ -11,7 +12,7 @@ import (
 	"github.com/justinas/nosurf"
 )
 
-func Router() *chi.Mux {
+func Router(app *config.AppConfig) http.Handler {
 	r := chi.NewRouter()
 
 	// MIDDLEWARES
