@@ -34,20 +34,36 @@ func ConnectDB() (*DB, error) {
 		return nil, err
 	}
 	dbConn.SQLite3 = db
+	testDB, _ := db.DB()
+	err = testDB.Ping()
+	if err != nil {
+		return nil, err
+	}
 	db.Exec("DROP TABLE users")
 	db.Exec("DROP TABLE messages")
-	execMigrations(db)
-	userSeeder(db)
+	err = execMigrations(db)
+	if err != nil {
+		return dbConn, err
+	}
+	err = execSeeder(db)
+	if err != nil {
+		return dbConn, err
+	}
 	return dbConn, nil
 }
 
 // execMigrations execute all the migrations
-func execMigrations(db *gorm.DB) {
+func execMigrations(db *gorm.DB) error {
 	// add all models's structs to AutoMigrate
-	db.AutoMigrate(&users, &messages)
+	err := db.AutoMigrate(&users, &messages)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 
-func userSeeder(db *gorm.DB) {
+func execSeeder(db *gorm.DB) error {
 
 	// all passwords are: password
 	users := []*models.User{
@@ -197,10 +213,13 @@ func userSeeder(db *gorm.DB) {
 	result := db.Create(users)
 	if err := result.Error; err != nil {
 		log.Println(err)
+		return err
 	}
 	result = db.Create(messages)
 	if err := result.Error; err != nil {
 		log.Println(err)
+		return err
 	}
 	log.Println("seeded users and chat")
+	return nil
 }
