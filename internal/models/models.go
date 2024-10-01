@@ -24,3 +24,11 @@ type Message struct {
 	UserID  uint64
 	User    User
 }
+
+type Session struct {
+	gorm.Model
+
+	Token  string  `gorm:"primary_key;type:text"`
+	Data   []byte  `gorm:"not null;type:blob"`
+	Expiry float64 `gorm:"not null;index"`
+}

@@ -27,6 +27,7 @@ var Clients []websocket.Conn
 // db tables
 var users *models.User
 var messages *models.Message
+var session *models.Session
 
 func ConnectDB() (*DB, error) {
 	db, err := gorm.Open(sqlite.Open("GO_exp_learn.db"), &gorm.Config{})
@@ -41,6 +42,7 @@ func ConnectDB() (*DB, error) {
 	}
 	db.Exec("DROP TABLE users")
 	db.Exec("DROP TABLE messages")
+	db.Exec("DROP TABLE sessions")
 	err = execMigrations(db)
 	if err != nil {
 		return dbConn, err
@@ -55,7 +57,7 @@ func ConnectDB() (*DB, error) {
 // execMigrations execute all the migrations
 func execMigrations(db *gorm.DB) error {
 	// add all models's structs to AutoMigrate
-	err := db.AutoMigrate(&users, &messages)
+	err := db.AutoMigrate(&users, &messages, &session)
 	if err != nil {
 		log.Println(err)
 		return err

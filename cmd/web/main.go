@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
+	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/database"
@@ -25,18 +25,20 @@ func main() {
 		panic("failed to connect database")
 	}
 	log.Println("Connected to database")
+	sqlDB, _ := db.SQLite3.DB()
 	defer func() {
-		sqlDB, _ := db.SQLite3.DB()
 		sqlDB.Close()
 	}()
 
 	// set the session parameters
 	gob.Register(models.User{})
 	session = scs.New()
-	session.Lifetime = 24 * time.Hour
+	session.Store = sqlite3store.New(sqlDB)
+	/* session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = false
+	session.Cookie.HttpOnly = false */
 
 	appConfig.Session = session
 
