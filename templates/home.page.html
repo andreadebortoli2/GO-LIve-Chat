@@ -5,11 +5,48 @@
 {{define "content"}}
 {{if eq .ActiveUser.AccessLevel 0 }}
 <p>
-    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error facere consequuntur earum ab sapiente velit
-    doloremque, illum dolore iste quas, totam animi. Molestias a velit incidunt officiis corporis possimus laudantium.
+    This is a basic app where you can register, login and live chat, the admin can also edit user to give or remove
+    superior
+    access permission.
 </p>
-<div class="text-center p-2">
-    <a class="btn btn-primary" href="/new-user">Register</a>
+<p>
+    Once started you can chat simultaneously between different browsers.
+</p>
+<p>
+    To start <span><a class="btn btn-primary" href="/new-user">Register</a></span> or login with one existing
+    user:
+</p>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Username</th>
+                <th scope="col">Email</th>
+                <th scope="col">Password</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>admin</td>
+                <td>admin@admin.com</td>
+                <td>password</td>
+            </tr>
+            <tr>
+                <td>moderator</td>
+                <td>moderator@moderator.com</td>
+                <td>password</td>
+            </tr>
+            <tr>
+                <td>user</td>
+                <td>user@user.com</td>
+                <td>password</td>
+            </tr>
+        </tbody>
+    </table>
 </div>
+{{else}}
+<p>
+    Try the <span><a class="btn btn-info" href="/chat">Chat</a></span>
+</p>
 {{end}}
 {{end}}

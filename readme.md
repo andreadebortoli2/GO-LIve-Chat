@@ -1,6 +1,26 @@
-##### Buiding a web app with live chat
+##### A web app with live chat
 
-more info in the future....
+This is a basic app where you can register, login and live chat, the admin can also edit user to give or remove superior access permission.
+
+Once started you can chat simultaneously between different browsers.
+
+To try the app:
+- in editor terminal start the app with the command ```air``` 
+- open multiple browsers at [localhost](http://localhost:8080/)
+- register an account or login with one of the already existing profiles
+  - username: admin
+    - email: admin@admin.com
+    - password: password
+  - username: moderator
+    - email: moderator@moderator.com
+    - password: password
+  - username: user
+    - email: user@user.com
+    - password: password
+- chat simultaneously between the browsers
+- admin can access to users list to delete user or modify the access level
+
+
 
 ---
 
