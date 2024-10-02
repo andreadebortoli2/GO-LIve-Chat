@@ -5,20 +5,26 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
-	"github.com/alexedwards/scs/sqlite3store"
-	"github.com/alexedwards/scs/v2"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/database"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/handlers"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/render"
+	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
 )
 
 var appConfig config.AppConfig
-var session *scs.SessionManager
+
+var session *sessions.CookieStore
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic("Error loading .env file")
+	}
 
 	db, err := database.ConnectDB()
 	if err != nil {
@@ -30,16 +36,9 @@ func main() {
 		sqlDB.Close()
 	}()
 
-	// set the session parameters
+	// set the session
 	gob.Register(models.User{})
-	session = scs.New()
-	session.Store = sqlite3store.New(sqlDB)
-	/* session.Lifetime = 24 * time.Hour
-	session.Cookie.Persist = true
-	session.Cookie.SameSite = http.SameSiteLaxMode
-	session.Cookie.Secure = false
-	session.Cookie.HttpOnly = false */
-
+	session = sessions.NewCookieStore([]byte(os.Getenv("MY_SECRET_KEY")))
 	appConfig.Session = session
 
 	repo := handlers.NewRepo(&appConfig, db)

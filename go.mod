@@ -9,11 +9,12 @@ require (
 )
 
 require (
-	github.com/alexedwards/scs/sqlite3store v0.0.0-20240316134038-7e11d57e8885
-	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/glebarez/sqlite v1.11.0
+	github.com/gorilla/context v1.1.2
+	github.com/gorilla/sessions v1.4.0
 	github.com/gorilla/websocket v1.5.3
+	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.27.0
 	gorm.io/gorm v1.25.12
 )
@@ -22,6 +23,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect

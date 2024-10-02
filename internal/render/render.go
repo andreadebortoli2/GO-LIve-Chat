@@ -38,13 +38,15 @@ type ActiveUser struct {
 
 func addDataToTemplate(td TemplateData, r *http.Request) TemplateData {
 	td.CSRFToken = nosurf.Token(r)
-	if appConfig.Session.Exists(r.Context(), "user") {
 
-		u, ok := appConfig.Session.Get(r.Context(), "user").(models.User)
-		if !ok {
-			log.Println("could not convert value to User")
-			return td
-		}
+	ses, err := appConfig.Session.Get(r, "active_user")
+	if err != nil {
+		log.Println("cannot get session (render add data)", err)
+		return td
+	}
+
+	if !ses.IsNew {
+		u := ses.Values["user"].(models.User)
 		td.ActiveUser.ID = u.ID
 		td.ActiveUser.UserName = u.UserName
 		td.ActiveUser.Email = u.Email
@@ -55,6 +57,7 @@ func addDataToTemplate(td TemplateData, r *http.Request) TemplateData {
 		}
 		td.ActiveUser.AccessLevel = accLvl
 	}
+
 	return td
 }
 
@@ -74,13 +77,13 @@ func RenderPage(w http.ResponseWriter, r *http.Request, pageName string, handler
 
 	err := requestedPage.Execute(buf, data)
 	if err != nil {
-		log.Println("here", err)
+		log.Println("page execute err", err)
 		return err
 	}
 
 	_, err = buf.WriteTo(w)
 	if err != nil {
-		log.Println("err:", err)
+		log.Println("write err:", err)
 		return err
 	}
 
@@ -94,7 +97,7 @@ func pagesCache() (map[string]*template.Template, error) {
 
 	pages, err := filepath.Glob("./templates/*.page.html")
 	if err != nil {
-		log.Println("can't find pages files")
+		log.Println("can't find pages files", err)
 		return pagesCache, err
 	}
 

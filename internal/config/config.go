@@ -1,9 +1,7 @@
 package config
 
-import (
-	"github.com/alexedwards/scs/v2"
-)
+import "github.com/gorilla/sessions"
 
 type AppConfig struct {
-	Session *scs.SessionManager
+	Session *sessions.CookieStore
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/helpers"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/models"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/render"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -32,6 +33,14 @@ func NewRepo(a *config.AppConfig, db *database.DB) *Repository {
 func NewHandlers(r *Repository) {
 	Repo = r
 }
+
+// websocket
+var WsConn *websocket.Conn
+var Upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+var Clients []websocket.Conn
 
 // ShowHomePage show home page
 func (m *Repository) ShowHomePage(w http.ResponseWriter, r *http.Request) {
@@ -72,17 +81,34 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = m.App.Session.RenewToken(r.Context())
-
-	m.App.Session.Put(r.Context(), "user", user)
+	ses, err := m.App.Session.Get(r, "active_user")
+	if err != nil {
+		log.Println("cannot get the session (post login)", err)
+		return
+	}
+	ses.Options.MaxAge = 3600 * 12 // session last 12 hours
+	ses.Values["user"] = user
+	err = ses.Save(r, w)
+	if err != nil {
+		log.Println("cannot save session (post login)", err)
+	}
 
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
 // ShowLogoutPage logic to logout the user
 func (m *Repository) ShowLogoutPage(w http.ResponseWriter, r *http.Request) {
-	_ = m.App.Session.Destroy(r.Context())
-	_ = m.App.Session.RenewToken(r.Context())
+
+	ses, err := m.App.Session.Get(r, "active_user")
+	if err != nil {
+		log.Println("cannot get the session (logout)", err)
+		return
+	}
+	ses.Options.MaxAge = -1
+	err = ses.Save(r, w)
+	if err != nil {
+		log.Println("cannot save session (logout)", err)
+	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -129,9 +155,17 @@ func (m *Repository) PostNewUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = m.App.Session.RenewToken(r.Context())
-
-	m.App.Session.Put(r.Context(), "user", user)
+	ses, err := m.App.Session.Get(r, "active_user")
+	if err != nil {
+		log.Println("cannot get the session (post new user)", err)
+		return
+	}
+	ses.Options.MaxAge = 3600 * 12 // session last 12 hours
+	ses.Values["user"] = user
+	err = ses.Save(r, w)
+	if err != nil {
+		log.Println("cannot save session (post new user)", err)
+	}
 
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
@@ -245,11 +279,17 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 
 	var msgstempl string
 
-	for _, m := range messages {
-		u := Repo.App.Session.Get(r.Context(), "user").(models.User)
+	for _, msg := range messages {
+
+		ses, err := m.App.Session.Get(r, "active_user")
+		if err != nil {
+			log.Println("cannot get the session (post new user)", err)
+			return
+		}
+		u := ses.Values["user"].(models.User)
 		activeUserID := u.ID
 		var msgsHTMLstr string
-		if m.User.ID == activeUserID {
+		if msg.User.ID == activeUserID {
 			msgsHTMLstr = fmt.Sprintf(
 				`<div class="d-flex justify-content-end">
 				<div class="card w-75 mb-3 text-end bg-warning-subtle">
@@ -259,7 +299,7 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 					</div>
 				</div>
 			</div>
-		`, m.User.UserName, m.Content)
+		`, msg.User.UserName, msg.Content)
 		} else {
 			msgsHTMLstr = fmt.Sprintf(
 				`<div class="d-flex justify-content-start">
@@ -270,7 +310,7 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 					</div>
 				</div>
 			</div>
-		`, m.User.UserName, m.Content)
+		`, msg.User.UserName, msg.Content)
 		}
 
 		msgstempl += msgsHTMLstr
@@ -281,113 +321,118 @@ func (m *Repository) ShowOlderMessages(w http.ResponseWriter, r *http.Request) {
 	templ.Execute(w, nil)
 }
 
-// PostNewMessage post the message sent from chat removed
-/* func (m *Repository) PostNewMessage(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/chat", http.StatusSeeOther)
-		return
-	}
+// PostNewMessage post the message sent from chat **_removed_**
+// func (m *Repository) PostNewMessage(w http.ResponseWriter, r *http.Request) {
+// 	err := r.ParseForm()
+// 	if err != nil {
+// 		log.Println(err)
+// 		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+// 		return
+// 	}
 
-	userId := r.Form.Get("user-id")
-	msg := r.Form.Get("message-content")
-	userIdInt, err := strconv.Atoi(userId)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/chat", http.StatusSeeOther)
-		return
-	}
+// 	userId := r.Form.Get("user-id")
+// 	msg := r.Form.Get("message-content")
+// 	userIdInt, err := strconv.Atoi(userId)
+// 	if err != nil {
+// 		log.Println(err)
+// 		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+// 		return
+// 	}
 
-	err = m.db.PostNewMessage(userIdInt, msg)
-	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/chat", http.StatusSeeOther)
-		return
-	}
+// 	err = m.db.PostNewMessage(userIdInt, msg)
+// 	if err != nil {
+// 		log.Println(err)
+// 		http.Redirect(w, r, "/chat", http.StatusSeeOther)
+// 		return
+// 	}
 
-	u := Repo.App.Session.Get(r.Context(), "user").(models.User)
-	msgStr := fmt.Sprintf(
-		`<div class="d-flex justify-content-end">
-				<div class="card w-75 mb-3 text-end bg-warning-subtle">
-					<div class="card-body">
-						<h6 class="card-title">%s</h6>
-						<p class="card-text">%s</p>
-					</div>
-				</div>
-			</div>
-		`, u.UserName, msg)
+// 	u := Repo.App.Session.Get(r.Context(), "user").(models.User)
+// 	msgStr := fmt.Sprintf(
+// 		`<div class="d-flex justify-content-end">
+// 				<div class="card w-75 mb-3 text-end bg-warning-subtle">
+// 					<div class="card-body">
+// 						<h6 class="card-title">%s</h6>
+// 						<p class="card-text">%s</p>
+// 					</div>
+// 				</div>
+// 			</div>
+// 		`, u.UserName, msg)
 
-	// return with HTMX
-	templ, _ := template.New("t").Parse(msgStr)
-	templ.Execute(w, nil)
-} */
+// 	// return with HTMX
+// 	templ, _ := template.New("t").Parse(msgStr)
+// 	templ.Execute(w, nil)
+// }
 
 // WebsocketHandler listeh to page via websocket, save new message into the db and display on every client
 func (m *Repository) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := database.Upgrader.Upgrade(w, r, nil)
+
+	WsConn, err := Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	database.Clients = append(database.Clients, *conn)
+	Clients = append(Clients, *WsConn)
+
+	defer WsConn.Close()
 
 	for {
-		_, msg, err := conn.ReadMessage()
+		_, msg, err := WsConn.ReadMessage()
 		if err != nil {
-			http.Redirect(w, r, "/chat", http.StatusSeeOther)
-			return
+			log.Println("read ws message err")
+			continue
 		}
 
 		// log.Println(string(msg))
-		msgAdd := conn.RemoteAddr()
+		log.Println("read msg")
+		msgAdd := WsConn.RemoteAddr()
 		var message map[string]string
 		json.Unmarshal(msg, &message)
 
 		userIdInt, err := strconv.Atoi(message["user-id"])
 		if err != nil {
 			log.Println(err)
-			http.Redirect(w, r, "/chat", http.StatusSeeOther)
-			return
+			log.Println("in ws conv int to string err")
+			continue
 		}
 
 		err = m.db.PostNewMessage(userIdInt, message["message-content"])
 		if err != nil {
 			log.Println(err)
-			http.Redirect(w, r, "/chat", http.StatusSeeOther)
-			return
+			log.Println("in ws post message in db err")
+			continue
 		}
 
-		for _, c := range database.Clients {
+		for _, c := range Clients {
 			var msgStr string
 			if msgAdd.String() == c.RemoteAddr().String() {
 				msgStr = fmt.Sprintf(`
-					<div class="d-flex justify-content-end">
-						<div class="card w-75 mb-3 text-end bg-warning-subtle">
-							<div class="card-body">
-								<h6 class="card-title">%s</h6>
-								<p class="card-text">%s</p>
-							</div>
-						</div>
-					</div>
+				<div class="d-flex justify-content-end">
+				<div class="card w-75 mb-3 text-end bg-warning-subtle">
+				<div class="card-body">
+				<h6 class="card-title">%s</h6>
+				<p class="card-text">%s</p>
+				</div>
+				</div>
+				</div>
 				`, message["user-username"], message["message-content"])
 			} else {
 				msgStr = fmt.Sprintf(`
 					<div class="d-flex justify-content-start">
-						<div class="card w-75 mb-3 text-start bg-success-subtle">
-							<div class="card-body">
-								<h6 class="card-title">%s</h6>
-								<p class="card-text">%s</p>
-							</div>
-						</div>
+					<div class="card w-75 mb-3 text-start bg-success-subtle">
+					<div class="card-body">
+					<h6 class="card-title">%s</h6>
+					<p class="card-text">%s</p>
 					</div>
-				`, message["user-username"], message["message-content"])
+					</div>
+					</div>
+					`, message["user-username"], message["message-content"])
 			}
 			if err = c.WriteMessage(websocket.TextMessage, []byte(msgStr)); err != nil {
-				http.Redirect(w, r, "/chat", http.StatusSeeOther)
-				return
+				log.Println("write ws message err")
+				continue
 			}
 		}
 	}
+
 }
