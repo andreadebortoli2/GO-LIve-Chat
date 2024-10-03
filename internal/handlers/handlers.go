@@ -379,7 +379,7 @@ func (m *Repository) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, msg, err := WsConn.ReadMessage()
 		if err != nil {
-			log.Println("read ws message err")
+			// log.Println("read ws message err")
 			continue
 		}
 
@@ -392,14 +392,14 @@ func (m *Repository) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 		userIdInt, err := strconv.Atoi(message["user-id"])
 		if err != nil {
 			log.Println(err)
-			log.Println("in ws conv int to string err")
+			log.Println("ws conv int to string err")
 			continue
 		}
 
 		err = m.db.PostNewMessage(userIdInt, message["message-content"])
 		if err != nil {
 			log.Println(err)
-			log.Println("in ws post message in db err")
+			log.Println("ws post message in db err")
 			continue
 		}
 
@@ -429,7 +429,7 @@ func (m *Repository) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 					`, message["user-username"], message["message-content"])
 			}
 			if err = c.WriteMessage(websocket.TextMessage, []byte(msgStr)); err != nil {
-				log.Println("write ws message err")
+				// log.Println("write ws message err")
 				continue
 			}
 		}
