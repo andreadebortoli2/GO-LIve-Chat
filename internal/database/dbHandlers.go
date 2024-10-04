@@ -181,3 +181,17 @@ func (m *DB) PostNewMessage(id int, msg string) error {
 
 	return nil
 }
+
+func (m *DB) GetAllModerators() ([]models.User, error) {
+	var mods []models.User
+	tx := dbConn.SQLite3.Where("access_level = ?", "2").Find(&mods).Order("id")
+	if err := tx.Error; err != nil {
+		log.Println(err)
+		return mods, errors.New("cannot find the mods into the database")
+	}
+	if tx.RowsAffected <= 0 {
+		return mods, errors.New("mods not found")
+	}
+
+	return mods, nil
+}

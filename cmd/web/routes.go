@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/config"
 	"github.com/andreadebortoli2/GO-Live-Chat/internal/handlers"
@@ -44,6 +45,11 @@ func Router(app *config.AppConfig) http.Handler {
 		r.Get("/older-messages", handlers.Repo.ShowOlderMessages)
 		// r.Post("/new-message", handlers.Repo.PostNewMessage) removed to use websocket
 		r.Get("/ws", handlers.Repo.WebsocketHandler)
+
+		r.Group(func(r chi.Router) {
+			r.Use(moderatrorAuthMiddleware)
+			r.Get("/moderators-list", handlers.Repo.ShowModeratorsPage)
+		})
 
 		// restricted admin routes
 		r.Route("/admin", func(r chi.Router) {
@@ -118,7 +124,7 @@ func authMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// adminAuthMiddleware authenticate registered users
+// adminAuthMiddleware give access to only admin section
 func adminAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -133,6 +139,31 @@ func adminAuthMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		} else {
 			log.Println("not authorized (admin auth middleware)")
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+	})
+}
+
+// moderatrorAuthMiddleware give access to mod adn admin to moderator section
+func moderatrorAuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		ses, err := session.Get(r, "active_user")
+		if err != nil {
+			log.Println("cannot get the session (moderator auth middleware)", err)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		u := ses.Values["user"].(models.User)
+		accLvl, err := strconv.Atoi(u.AccessLevel)
+		if err != nil {
+			log.Println("cannot convert access levele (moderator auth middleware)")
+		}
+		if accLvl > 1 {
+			next.ServeHTTP(w, r)
+		} else {
+			log.Println("not authorized (moderator auth middleware)")
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}

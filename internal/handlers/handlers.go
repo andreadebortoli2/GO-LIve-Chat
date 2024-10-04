@@ -436,3 +436,21 @@ func (m *Repository) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+// ShowModeratorsPage show login page
+func (m *Repository) ShowModeratorsPage(w http.ResponseWriter, r *http.Request) {
+	mods, err := m.db.GetAllModerators()
+	if err != nil {
+		helpers.RenderErr(err, w, r, "moderators", nil)
+	}
+	datamods := make(map[string]interface{})
+	for i, u := range mods {
+		index := strconv.Itoa(i)
+		datamods[index] = u
+	}
+	data := make(map[string]interface{})
+	data["moderators"] = datamods
+	render.RenderPage(w, r, "moderators", render.TemplateData{
+		Data: data,
+	})
+}

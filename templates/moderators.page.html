@@ -1,0 +1,14 @@
+{{template "base" .}}
+{{define "page_title"}}
+<h2>Moderators page</h2>
+{{end}}
+{{define "content"}}
+<h4>Moderators only list:</h4>
+<ul>
+    {{range index .Data "moderators"}}
+    <li>
+        {{.UserName}}
+    </li>
+    {{end}}
+</ul>
+{{end}}
