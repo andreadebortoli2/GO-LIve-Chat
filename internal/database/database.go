@@ -21,7 +21,7 @@ var users *models.User
 var messages *models.Message
 
 func ConnectDB() (*DB, error) {
-	db, err := gorm.Open(sqlite.Open("GO_exp_learn.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("GO_live_chat.db"), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
