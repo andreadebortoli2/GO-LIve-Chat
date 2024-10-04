@@ -5,7 +5,7 @@ This is a basic app where you can register, login and live chat, the admin can a
 Once started you can chat simultaneously between different browsers.
 
 To try the app:
-- in editor terminal start the app with the command ```air``` 
+- in editor terminal, with the command ```air```  start the app in developer mode
 - open multiple browsers at [localhost](http://localhost:8080/)
 - register an account or login with one of the already existing profiles
   - username: admin
