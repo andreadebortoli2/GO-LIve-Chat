@@ -384,7 +384,7 @@ func (m *Repository) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// log.Println(string(msg))
-		log.Println("read msg")
+		// log.Println("read msg")
 		msgAdd := WsConn.RemoteAddr()
 		var message map[string]string
 		json.Unmarshal(msg, &message)
