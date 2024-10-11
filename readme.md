@@ -1,4 +1,4 @@
-##### A web app with live chat
+### A web app with live chat
 
 This is a basic app where you can register, login and live chat, the admin can also edit user to give or remove superior access permission.
 
@@ -37,3 +37,12 @@ To try the app:
 - use [</> htmx](https://htmx.org/) to execute form requests without reloading the page
 - use [Gorilla WebSocket](https://github.com/gorilla/websocket) for chat live load
 - use [Gorilla Sessions](https://github.com/gorilla/sessions) to manage the session
+
+
+---
+
+
+###### TO DO:
+- implement templ for templates
+- fix "old messages" bug
+- better handling of websocket connection closure
